@@ -487,6 +487,7 @@ const AppWithRouterContext: React.FC = () => {
     const mockLevel = getLevelFromXP(mockXP);
     const avatarPool = selectedPersona.gender === 'female' ? FEMALE_AI_AVATAR_URLS : MALE_AI_AVATAR_URLS;
     const randomAvatarUrl = avatarPool[Math.floor(Math.random() * avatarPool.length)];
+    const aiGendered = getGenderedStrings(selectedPersona.gender);
     
     const matchProfile: AIMatchProfile = {
         name: matchName,
@@ -495,7 +496,7 @@ const AppWithRouterContext: React.FC = () => {
         isAI: true,
         workshopsAttended: Math.floor(Math.random() * 15) + 5,
         activityStatus: "Actif",
-        badges: [{id: 'match_badge', name: "Prêt à connecter", icon: "💬"}],
+        badges: [{id: 'match_badge', name: `${aiGendered.pret} à connecter`, icon: "💬"}],
         avatarSeed: matchName,
         avatarUrl: randomAvatarUrl,
         gender: selectedPersona.gender,
@@ -523,6 +524,7 @@ const AppWithRouterContext: React.FC = () => {
         console.error("Persona 'solaire_sous_controle' not found. Creating a random match.");
         return createAIMatchForUser(currentUser);
     }
+    const aiGendered = getGenderedStrings(persona.gender);
     const matchName = "Sophie";
     const mockXP = 320;
     const mockLevel = getLevelFromXP(mockXP);
@@ -535,7 +537,7 @@ const AppWithRouterContext: React.FC = () => {
         isAI: true,
         workshopsAttended: 8,
         activityStatus: "Actif",
-        badges: [{id: 'match_badge', name: "Prête à connecter", icon: "💬"}],
+        badges: [{id: 'match_badge', name: `${aiGendered.pret} à connecter`, icon: "💬"}],
         avatarSeed: matchName,
         avatarUrl: sophieAvatarUrl,
         gender: persona.gender,
@@ -740,6 +742,7 @@ const AppWithRouterContext: React.FC = () => {
       flexiblePreferences: {},
       positiveRequests: [],
       myManualText: '',
+      datingPreferences: data.datingPreferences,
     };
     setUserProfile(newUserProfile);
     localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(newUserProfile));

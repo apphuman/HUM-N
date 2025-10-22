@@ -169,6 +169,59 @@ export const ProfessionCategoryOptions = {
 export type ProfessionCategory = typeof ProfessionCategoryOptions[keyof typeof ProfessionCategoryOptions]; // Non-nullable
 
 
+// --- New Dating Onboarding Types ---
+
+export const DatingApproachOptions = {
+    ACTIVE_OPTIMISTIC: 'active_optimistic',
+    TAKING_BREAK: 'taking_break',
+    OPEN_TO_OPPORTUNITIES: 'open_to_opportunities',
+    JADED_FRUSTRATED: 'jaded_frustrated',
+} as const;
+export type DatingApproach = typeof DatingApproachOptions[keyof typeof DatingApproachOptions];
+
+export const DatingAppFeelingOptions = {
+    MAIN_TOOL: 'main_tool',
+    EXHAUSTING: 'exhausting',
+    NECESSARY_EVIL: 'necessary_evil',
+    DONT_USE: 'dont_use',
+} as const;
+export type DatingAppFeeling = typeof DatingAppFeelingOptions[keyof typeof DatingAppFeelingOptions];
+
+export const DatingChallengeOptions = {
+    STARTING_CONVO: 'starting_convo',
+    BEING_MYSELF: 'being_myself',
+    ONLINE_TO_IRL: 'online_to_irl',
+    KEEPING_INTEREST: 'keeping_interest',
+} as const;
+export type DatingChallenge = typeof DatingChallengeOptions[keyof typeof DatingChallengeOptions];
+
+export const DatingGoalOptions = {
+    DEEP_CONNECTION: 'deep_connection',
+    LIGHT_FUN: 'light_fun',
+    FEEL_UNDERSTOOD: 'feel_understood',
+    UNSURE_EXPLORING: 'unsure_exploring',
+} as const;
+export type DatingGoal = typeof DatingGoalOptions[keyof typeof DatingGoalOptions];
+
+export const DatingSelfPerceptionOptions = {
+    CONFIDENT: 'confident',
+    OVERTHINKING: 'overthinking',
+    PLAYING_A_ROLE: 'playing_a_role',
+    HOPEFUL_GUARDED: 'hopeful_guarded',
+} as const;
+export type DatingSelfPerception = typeof DatingSelfPerceptionOptions[keyof typeof DatingSelfPerceptionOptions];
+
+export interface DatingPreferences {
+    approach: DatingApproach;
+    appFeeling: DatingAppFeeling;
+    challenge: DatingChallenge;
+    goal: DatingGoal;
+    selfPerception: DatingSelfPerception;
+}
+
+// --- End of New Dating Onboarding Types ---
+
+
 export interface PrivateChatMessage {
   id: string;
   sender: string; // 'user' or AI match name
@@ -217,6 +270,8 @@ export interface UserProfile {
   onboardingIntentText?: string;
   profilePicture?: string; // Base64 string for user's profile picture
   biography?: string; // For the generated bio
+  
+  datingPreferences?: DatingPreferences; // New field for dating questionnaire
 
   isOnboarded: boolean;
   isPremium?: boolean; // Added for premium features
@@ -270,6 +325,7 @@ export type OnboardingData = {
   location: string;
   onboardingIntentText: string;
   socialInteractionStyle: SocialInteractionStyle;
+  datingPreferences: DatingPreferences;
 };
 
 

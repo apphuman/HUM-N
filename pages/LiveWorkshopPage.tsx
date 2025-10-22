@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import StyledButton from '../components/StyledButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { WorkshopTheme, UserProfile, ChatMessage, ParticipantProfileInfo, LiveWorkshopGlobalState, WorkshopSummaryData, ContextMenuState } from '../types';
-import { getLevelFromXP, EMOTIONAL_XP_TYPES, EMOJI_REACTION_OPTIONS } from '../constants'; 
+import { getLevelFromXP, EMOTIONAL_XP_TYPES, EMOJI_REACTION_OPTIONS, getGenderedStrings } from '../constants'; 
 import Avatar from '../components/Avatar';
 import ParticipantProfileModal from '../components/ParticipantProfileModal';
 import WorkshopSummaryModal from '../components/WorkshopSummaryModal'; 
@@ -66,6 +66,7 @@ const LiveWorkshopPage: React.FC<LiveWorkshopPageProps> = ({
   const [showFinishConfirmation, setShowFinishConfirmation] = useState(false);
   const [showEmojiPickerFor, setShowEmojiPickerFor] = useState<string | null>(null);
 
+  const gendered = getGenderedStrings(userProfile.gender);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -383,7 +384,7 @@ const LiveWorkshopPage: React.FC<LiveWorkshopPageProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm flex items-center justify-center p-4 z-[600]">
           <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Confirmation</h3>
-            <p className="text-sm text-gray-600 mb-6">Es-tu sûr de vouloir terminer et archiver cet atelier ? Tu ne pourras plus y envoyer de messages.</p>
+            <p className="text-sm text-gray-600 mb-6">Es-tu {gendered.sur} de vouloir terminer et archiver cet atelier ? Tu ne pourras plus y envoyer de messages.</p>
             <div className="flex justify-end space-x-3">
               <StyledButton onClick={cancelFinishWorkshop} variant="secondary" size="sm">
                 <XIcon className="w-4 h-4 mr-1.5" /> Annuler

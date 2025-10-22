@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import PageContainer from '../components/PageContainer';
@@ -134,7 +135,7 @@ const HomePage: React.FC = () => {
       </section>
       
       <section className="mb-8 text-center">
-        <h3 className="text-lg font-semibold mb-2 text-[var(--text-color-dark)]">Prêt à commencer ?</h3>
+        <h3 className="text-lg font-semibold mb-2 text-[var(--text-color-dark)]">Prêt·e à commencer ?</h3>
         <p className="text-[var(--text-color-light)] mb-4 max-w-md mx-auto">
           Votre chemin personnel est unique. Explorez, partagez, grandissez.
         </p>

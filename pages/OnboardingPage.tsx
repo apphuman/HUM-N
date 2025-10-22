@@ -1,7 +1,17 @@
-
 import React, { useState, useRef } from 'react';
 import StyledButton from '../components/StyledButton';
-import { OnboardingData, AgeRange, AgeRanges, SocialInteractionStyle, SocialInteractionStyleOptions, UserProfile } from '../types';
+import { 
+    OnboardingData, 
+    AgeRange, AgeRanges, 
+    SocialInteractionStyle, SocialInteractionStyleOptions, 
+    UserProfile,
+    DatingPreferences,
+    DatingApproach, DatingApproachOptions,
+    DatingAppFeeling, DatingAppFeelingOptions,
+    DatingChallenge, DatingChallengeOptions,
+    DatingGoal, DatingGoalOptions,
+    DatingSelfPerception, DatingSelfPerceptionOptions
+} from '../types';
 import { HumanLogo, CheckIcon } from '../components/icons';
 import { GENDER_OPTIONS, getGenderedStrings } from '../constants';
 
@@ -47,10 +57,19 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
   const [preferNotToSayLocation, setPreferNotToSayLocation] = useState(false);
   const [socialInteractionStyle, setSocialInteractionStyle] = useState<SocialInteractionStyle | null>(null);
 
+  // New state for dating questions
+  const [datingStep, setDatingStep] = useState(0);
+  const [datingApproach, setDatingApproach] = useState<DatingApproach | null>(null);
+  const [datingAppFeeling, setDatingAppFeeling] = useState<DatingAppFeeling | null>(null);
+  const [datingChallenge, setDatingChallenge] = useState<DatingChallenge | null>(null);
+  const [datingGoal, setDatingGoal] = useState<DatingGoal | null>(null);
+  const [datingSelfPerception, setDatingSelfPerception] = useState<DatingSelfPerception | null>(null);
+
+
   const [isExiting, setIsExiting] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const totalSteps = 6;
+  const totalSteps = 7;
   const gendered = getGenderedStrings(gender || 'prefer_not_to_say');
 
   const changeStep = (nextStep: number) => {
@@ -90,15 +109,24 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
   };
   
   const handleFinalSubmit = () => {
-    if (!firstName.trim() || !gender || !ageRange || (!location.trim() && !preferNotToSayLocation) || !socialInteractionStyle) {
+    if (!firstName.trim() || !gender || !ageRange || (!location.trim() && !preferNotToSayLocation) || !socialInteractionStyle || !datingApproach || !datingAppFeeling || !datingChallenge || !datingGoal || !datingSelfPerception) {
       alert("Merci de remplir tous les champs.");
       return;
     }
     
+    const datingPreferences: DatingPreferences = {
+      approach: datingApproach,
+      appFeeling: datingAppFeeling,
+      challenge: datingChallenge,
+      goal: datingGoal,
+      selfPerception: datingSelfPerception,
+    };
+
     onOnboardingComplete({
       firstName, gender, ageRange, socialInteractionStyle,
       location: preferNotToSayLocation ? 'Non spécifié' : location,
       onboardingIntentText,
+      datingPreferences,
     });
   };
 
@@ -230,8 +258,79 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
             <StyledButton fullWidth onClick={() => changeStep(5)} disabled={!gender || !ageRange || (!location.trim() && !preferNotToSayLocation)}>Suivant</StyledButton>
           </div>
         );
+      
+      case 5: {
+        const datingQuestions = [
+            { question: "Quel est ton état d'esprit actuel face aux rencontres ?", setter: setDatingApproach, options: [
+                { value: DatingApproachOptions.ACTIVE_OPTIMISTIC, label: "En recherche active et optimiste" },
+                { value: DatingApproachOptions.TAKING_BREAK, label: "Je fais une pause, besoin de me recentrer" },
+                { value: DatingApproachOptions.OPEN_TO_OPPORTUNITIES, label: "Ouvert·e si une belle rencontre se présente" },
+                { value: DatingApproachOptions.JADED_FRUSTRATED, label: "Un peu lassé·e ou frustré·e" },
+            ]},
+            { question: "Ta relation avec les applis de rencontre ?", setter: setDatingAppFeeling, options: [
+                { value: DatingAppFeelingOptions.MAIN_TOOL, label: "C'est mon principal moyen de rencontrer" },
+                { value: DatingAppFeelingOptions.EXHAUSTING, label: "J'y passe du temps, mais c'est épuisant" },
+                { value: DatingAppFeelingOptions.NECESSARY_EVIL, label: "Un mal nécessaire, je préférerais autrement" },
+                { value: DatingAppFeelingOptions.DONT_USE, label: "Je n'en utilise pas ou très peu" },
+            ]},
+            { question: "Le plus difficile pour toi dans les débuts ?", setter: setDatingChallenge, options: [
+                { value: DatingChallengeOptions.STARTING_CONVO, label: "Engager la conversation et briser la glace" },
+                { value: DatingChallengeOptions.BEING_MYSELF, label: "Me montrer tel·le que je suis vraiment" },
+                { value: DatingChallengeOptions.ONLINE_TO_IRL, label: "Passer de l'échange en ligne à la rencontre" },
+                { value: DatingChallengeOptions.KEEPING_INTEREST, label: "Maintenir une connexion intéressante" },
+            ]},
+            { question: "Au fond, que recherches-tu le plus ?", setter: setDatingGoal, options: [
+                { value: DatingGoalOptions.DEEP_CONNECTION, label: "Une connexion authentique et profonde" },
+                { value: DatingGoalOptions.LIGHT_FUN, label: "Quelque chose de léger et joyeux" },
+                { value: DatingGoalOptions.FEEL_UNDERSTOOD, label: "Me sentir compris·e et accepté·e" },
+                { value: DatingGoalOptions.UNSURE_EXPLORING, label: "Je ne suis pas encore sûr·e, j'explore" },
+            ]},
+            { question: "Comment te sens-tu avec toi-même dans ce processus ?", setter: setDatingSelfPerception, options: [
+                { value: DatingSelfPerceptionOptions.CONFIDENT, label: "Confiant·e, je sais ce que je vaux" },
+                { value: DatingSelfPerceptionOptions.OVERTHINKING, label: "Un peu en doute, j'ai tendance à trop réfléchir" },
+                { value: DatingSelfPerceptionOptions.PLAYING_A_ROLE, label: "J'ai l'impression de devoir jouer un rôle" },
+                { value: DatingSelfPerceptionOptions.HOPEFUL_GUARDED, label: "Plein·e d'espoir, mais un peu sur la défensive" },
+            ]},
+        ];
 
-      case 5:
+        const currentDatingQuestion = datingQuestions[datingStep];
+
+        return (
+            <div key={`${step}-${datingStep}`} className={`p-6 ${animationClass}`}>
+                 <h2 className="text-xl font-semibold text-center text-gray-800 mb-2">Ton territoire amoureux</h2>
+                 <p className="text-sm text-center text-gray-500 mb-6">Quelques questions pour mieux te comprendre.</p>
+                 
+                 <div className="w-full bg-gray-200 rounded-full h-1 mb-6">
+                    <div className="bg-orange-500 h-1 rounded-full" style={{ width: `${((datingStep + 1) / datingQuestions.length) * 100}%`, transition: 'width 0.3s' }}></div>
+                 </div>
+
+                 <p className="font-medium text-center text-gray-700 mb-4">{currentDatingQuestion.question}</p>
+
+                 <div className="space-y-3">
+                    {currentDatingQuestion.options.map(opt => (
+                        <button 
+                            key={opt.value}
+                            onClick={() => {
+                                (currentDatingQuestion.setter as React.Dispatch<React.SetStateAction<any>>)(opt.value);
+                                setTimeout(() => {
+                                    if (datingStep < datingQuestions.length - 1) {
+                                        setDatingStep(datingStep + 1);
+                                    } else {
+                                        changeStep(6);
+                                    }
+                                }, 250);
+                            }}
+                            className="w-full text-left p-4 border-2 rounded-lg transition-all duration-200 bg-white border-gray-200 hover:bg-orange-50 hover:border-orange-300"
+                        >
+                           {opt.label}
+                        </button>
+                    ))}
+                 </div>
+            </div>
+        )
+      }
+
+      case 6:
         return (
           <div key={step} className={`p-6 ${animationClass}`}>
              <h2 className="text-xl font-semibold text-center text-gray-800 mb-6">Comment aimes-tu interagir ?</h2>
@@ -239,7 +338,7 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
                 {interactionStyleOptions.map(opt => (
                     <button 
                         key={opt.value} 
-                        onClick={() => { setSocialInteractionStyle(opt.value); handleFinalSubmit(); }}
+                        onClick={() => { setSocialInteractionStyle(opt.value); changeStep(7); }}
                         className="w-full text-left p-4 border-2 rounded-lg transition-all duration-200 bg-white border-gray-200 hover:bg-orange-50 hover:border-orange-300"
                     >
                         <p className="font-semibold text-gray-800">{opt.label}</p>
@@ -247,6 +346,17 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
                     </button>
                 ))}
             </div>
+          </div>
+        );
+
+      case 7:
+         return (
+          <div key={step} className={`text-center p-8 flex flex-col items-center justify-center h-full ${animationClass}`}>
+             <p className="text-gray-600 leading-relaxed max-w-sm mb-8">
+              {socialInteractionStyle && "Merci. Ton rythme t’appartient et il sera respecté ici. Tu verras aussi comment d’autres avancent différemment. C’est cette diversité qui fait la richesse de HUMĀN."}
+            </p>
+             <p className="text-lg font-semibold text-gray-800 leading-relaxed max-w-sm mb-8">Ton profil est prêt. Mais il n’est pas figé : il grandira avec toi. Bienvenue chez HUMĀN.</p>
+             <StyledButton size="lg" onClick={handleFinalSubmit} variant="success">Accéder à HUMĀN</StyledButton>
           </div>
         );
 

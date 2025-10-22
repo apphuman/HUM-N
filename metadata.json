@@ -1,0 +1,8 @@
+{
+  "name": "HUMĀN",
+  "description": "Une application mobile minimaliste pour le bien-être et l'introspection, axée sur l'écriture et la progression personnelle.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "prompt": ""
+}

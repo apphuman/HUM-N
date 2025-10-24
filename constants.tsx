@@ -1,4 +1,4 @@
-
+// FIX: A large number of types were not exported from types.ts. They have been added and exported, fixing these import errors.
 import { NavItem, WorkshopTheme, LevelInfo, AudioCapsule, ProfessionCategory, WorkshopCategoryKey, AIMatchProfile, ProfessionCategoryOptions, AudioSuggestion, Persona, ActivityFeedItem, AspirationOptions, CurrentFeelingOptions, UserProfile, ParticipantProfileInfo, Badge, FictionalSpecialistProfile, AppVersion } from './types'; 
 import { HomeIcon } from './components/icons/HomeIcon';
 import { WorkshopsIcon } from './components/icons/WorkshopsIcon';
@@ -626,6 +626,21 @@ export const WORKSHOP_TEMPLATES: WorkshopTheme[] = [
     whatToGain: 'Des pistes pour établir des règles claires et saines sur l\'usage des réseaux sociaux dans son couple.',
     xpActivated: ["Réflexion Critique", "Communication", "Alignement", "Authenticité", "Partage", "Écoute Active", "Respect de soi"], categoryKey: 'amour', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/697243/pexels-photo-697243.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
+  {
+    id: 'w_tpl_amour_b_5',
+    type: 'cercle',
+    title: 'Soutenir son partenaire : geste d\'amour ou jeu de pouvoir ?',
+    description: 'Quand une femme aide un homme, où se situe la frontière entre partenariat et déséquilibre ? Peut-elle, doit-elle le soutenir ?',
+    detailedContent: 'Dans un couple moderne, les trajectoires ne sont pas toujours linéaires. Comment vit-on le fait de soutenir son partenaire, financièrement ou dans ses projets ? Est-ce un pilier de la confiance ou un risque de déséquilibre ? Cet atelier explore la vulnérabilité de celui qui reçoit et l\'intention de celle qui donne. Comment construire un soutien qui élève l\'autre sans l\'infantiliser ?',
+    whyThisWorkshop: 'Pour apprendre à naviguer l\'entraide dans le couple comme un véritable partenariat, basé sur la confiance et la communication.',
+    participantExpectations: 'Partage d\'expériences et de points de vue sur le soutien mutuel dans le couple.',
+    whatToGain: 'Des clés pour un soutien sain qui renforce le couple sans créer de dépendance ou de ressentiment.',
+    xpActivated: ["Communication", "Soutien actif", "Réflexion Critique", "Empathie", "Alignement", "Authenticité", "Respect de soi"],
+    categoryKey: 'amour',
+    requiredLevel: 'Builder',
+    duration: "25 min",
+    image: "https://images.pexels.com/photos/4386466/pexels-photo-4386466.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
   // --- AMOUR & RELATIONS: Engager ---
   {
     id: 'w_tpl_amour_e_1', type: 'cercle', title: 'La jalousie : preuve d’amour ou poison ?',
@@ -634,394 +649,49 @@ export const WORKSHOP_TEMPLATES: WorkshopTheme[] = [
     whyThisWorkshop: 'Pour mieux comprendre ce sentiment puissant et apprendre à le gérer de manière constructive.',
     participantExpectations: 'Un partage honnête de ses propres expériences avec la jalousie (ressentie ou subie).',
     whatToGain: 'Des stratégies pour apaiser la jalousie et renforcer la sécurité émotionnelle dans la relation.',
-    xpActivated: ["Gestion Émotionnelle", "Introspection", "Vulnérabilité", "Communication", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'amour', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/1586252/pexels-photo-1586252.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_amour_e_2', type: 'cercle', title: 'Rebondir après un échec amoureux',
-    description: 'Comment transformer une rupture douloureuse en une opportunité de croissance personnelle ?',
-    detailedContent: 'Une rupture est souvent vue comme un échec. Et si c\'était une étape nécessaire pour mieux se connaître et se reconstruire ?',
-    whyThisWorkshop: 'Pour partager nos histoires de résilience et trouver la force de se relever après une peine de cœur.',
-    participantExpectations: 'Soutien mutuel et partage de leçons apprises.',
-    whatToGain: 'Un regard nouveau sur les ruptures et des outils pour guérir et avancer.',
-    xpActivated: ["Résilience", "Auto-soutien", "Vulnérabilité", "Courage", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'amour', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/1470405/pexels-photo-1470405.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_amour_e_3', type: 'cercle', title: 'Rester ami avec son ex : possible ou dangereux ?',
-    description: 'Entretenir un lien après la rupture : est-ce un signe de maturité ou une source de complications ?',
-    detailedContent: 'Est-il vraiment possible de transformer un amour passé en amitié sincère ? Quelles sont les conditions et les pièges à éviter ?',
-    whyThisWorkshop: 'Pour réfléchir aux différentes manières de gérer la fin d\'une histoire et faire des choix conscients.',
-    participantExpectations: 'Partage d\'expériences variées, des réussites comme des échecs.',
-    whatToGain: 'De la clarté pour décider ce qui est le mieux pour soi et pour son ex-partenaire.',
-    xpActivated: ["Réflexion Critique", "Clarté émotionnelle", "Respect de soi", "Authenticité", "Partage", "Écoute Active", "Ouverture"], categoryKey: 'amour', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/4608197/pexels-photo-4608197.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- FAMILLE & QUOTIDIEN : Seeker ---
-  {
-    id: 'w_tpl_famille_s_1', type: 'cercle', title: 'Les repas de famille : plaisir ou corvée ?',
-    description: 'Entre moments de partage et tensions sous-jacentes, comment vivre sereinement ces réunions ?',
-    detailedContent: 'Les repas de famille sont un concentré de dynamiques complexes. Comment navigues-tu entre les sujets qui fâchent et le désir de passer un bon moment ?',
-    whyThisWorkshop: 'Pour partager des astuces et des ressentis afin de rendre ces moments plus légers et authentiques.',
-    participantExpectations: 'Partage d\'anecdotes et de stratégies pour survivre (et même apprécier) les repas de famille.',
-    whatToGain: 'Des outils pour mieux gérer les conversations difficiles et protéger son énergie.',
-    xpActivated: ["Gestion Émotionnelle", "Communication", "Humour", "Authenticité", "Partage", "Écoute Active", "Respect de soi"], categoryKey: 'famille', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/6956429/pexels-photo-6956429.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_famille_s_2', type: 'cercle', title: 'La relation avec ma belle-famille',
-    description: 'Trouver sa place dans une nouvelle famille : un défi d\'équilibriste. Comment gérer les attentes et les différences ?',
-    detailedContent: 'La belle-famille peut être une source de soutien ou de stress. Comment construire une relation saine sans se perdre soi-même ?',
-    whyThisWorkshop: 'Pour échanger sur les défis et les joies des relations avec la belle-famille.',
-    participantExpectations: 'Un partage honnête sur les dynamiques et les ajustements nécessaires.',
-    whatToGain: 'Des stratégies pour communiquer et poser ses limites avec bienveillance.',
-    xpActivated: ["Communication", "Respect de soi", "Empathie", "Authenticité", "Partage", "Écoute Active", "Ouverture"], categoryKey: 'famille', requiredLevel: 'Seeker', duration: "25 min", image: "https://images.pexels.com/photos/3957987/pexels-photo-3957987.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_famille_s_3', type: 'cercle', title: 'Mon rôle dans ma fratrie',
-    description: 'Notre place dans la fratrie (aîné, cadet, benjamin) influence souvent notre personnalité. Explorons ces rôles et comment ils nous façonnent.',
-    detailedContent: 'Aîné responsable, cadet créatif, benjamin chouchouté... Ces clichés sont-ils vrais pour toi ? Comment ta place dans la fratrie a-t-elle influencé tes relations ?',
-    whyThisWorkshop: 'Pour mieux comprendre certains de nos schémas comportementaux et notre manière d\'interagir avec les autres.',
-    participantExpectations: 'Partage d\'expériences sur la vie de fratrie et les rôles que l\'on y a joués.',
-    whatToGain: 'Une nouvelle perspective sur soi-même et ses relations.',
-    xpActivated: ["Introspection", "Réflexion Critique", "Partage", "Authenticité", "Écoute Active", "Respect de soi", "Ouverture"], categoryKey: 'famille', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/5699431/pexels-photo-5699431.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_famille_s_4', type: 'cercle', title: 'Vivre loin de sa famille : manque ou liberté ?',
-    description: 'La distance géographique peut être un choix ou une contrainte. Comment la vit-on au quotidien ?',
-    detailedContent: 'Entre la culpabilité de l\'éloignement et la joie de l\'indépendance, comment trouver son équilibre quand on vit loin de ses racines familiales ?',
-    whyThisWorkshop: 'Pour partager les défis et les bénéfices de la distance et se sentir moins seul dans cette expérience.',
-    participantExpectations: 'Un partage sincère sur les émotions liées à l\'éloignement familial.',
-    whatToGain: 'Des astuces pour maintenir le lien malgré la distance et déculpabiliser.',
-    xpActivated: ["Gestion Émotionnelle", "Authenticité", "Partage", "Écoute Active", "Respect de soi", "Ouverture", "Humour"], categoryKey: 'famille', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/4553368/pexels-photo-4553368.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-   {
-    id: 'w_tpl_famille_s_5', type: 'cercle', title: 'Faut-il fêter toutes les traditions familiales ?',
-    description: 'Noël, anniversaires, fêtes religieuses... Faut-il suivre le mouvement ou créer ses propres rituels ?',
-    detailedContent: 'Les traditions peuvent être un ciment... ou une source de contrainte. Comment navigues-tu entre le respect des traditions et ton besoin de sens personnel ?',
-    whyThisWorkshop: 'Pour réfléchir à la place des rituels dans nos vies et se sentir libre de les réinventer.',
-    participantExpectations: 'Partage d\'expériences sur le poids et la joie des traditions.',
-    whatToGain: 'L\'autorisation de créer ses propres traditions, alignées avec ses valeurs.',
-    xpActivated: ["Authenticité", "Alignement", "Réflexion Critique", "Partage", "Écoute Active", "Respect de soi", "Ouverture"], categoryKey: 'famille', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/5797905/pexels-photo-5797905.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- FAMILLE & QUOTIDIEN : Builder ---
-  {
-    id: 'w_tpl_famille_b_1', type: 'cercle', title: 'L’argent dans la famille, tabou ou transparence ?',
-    description: 'Prêts, héritages, dépenses... Comment aborder les questions financières en famille sans créer de tensions ?',
-    detailedContent: 'L\'argent est souvent un sujet délicat en famille. Faut-il être totalement transparent ou garder une certaine discrétion ? Comment gérer les inégalités ?',
-    whyThisWorkshop: 'Pour dédramatiser le sujet de l\'argent et apprendre à en parler plus sereinement.',
-    participantExpectations: 'Une discussion ouverte et pragmatique, sans jugement sur les situations de chacun.',
-    whatToGain: 'Des pistes pour une communication financière plus saine au sein de la famille.',
-    xpActivated: ["Communication", "Alignement", "Clarté émotionnelle", "Authenticité", "Partage", "Écoute Active", "Respect de soi"], categoryKey: 'famille', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/4386442/pexels-photo-4386442.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-    {
-    id: 'w_tpl_famille_b_2', type: 'cercle', title: 'Faut-il tout dire aux enfants ?',
-    description: 'Maladie, problèmes d\'argent, conflits... Quelle est la juste mesure entre protection et honnêteté avec les enfants ?',
-    detailedContent: 'La vérité est-elle toujours bonne à dire aux enfants ? Comment adapter notre discours à leur âge et leur sensibilité ? Partageons nos approches.',
-    whyThisWorkshop: 'Pour développer une communication familiale plus juste et respectueuse des capacités de chacun.',
-    participantExpectations: 'Un échange de points de vue sur la communication avec les enfants.',
-    whatToGain: 'Des clés pour aborder les sujets difficiles en famille avec plus de confiance.',
-    xpActivated: ["Communication", "Empathie", "Réflexion Critique", "Authenticité", "Partage", "Écoute Active", "Respect de soi"], categoryKey: 'famille', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/8199708/pexels-photo-8199708.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_famille_b_3', type: 'cercle', title: 'Mon rôle auprès de mes parents qui vieillissent',
-    description: 'Entre inquiétude, devoir et respect de leur autonomie, comment accompagner ses parents dans l\'avancée en âge ?',
-    detailedContent: 'Voir ses parents vieillir peut inverser les rôles et soulever de nombreuses questions. Comment trouver la juste distance et le bon type de soutien ?',
-    whyThisWorkshop: 'Pour partager ses doutes et ses expériences face à cette étape de vie et se sentir soutenu.',
-    participantExpectations: 'Un échange bienveillant sur un sujet touchant et universel.',
-    whatToGain: 'Des perspectives pour mieux vivre cette transition et prendre soin de soi tout en prenant soin d\'eux.',
-    xpActivated: ["Gestion Émotionnelle", "Empathie", "Soutien actif", "Authenticité", "Partage", "Écoute Active", "Respect de soi"], categoryKey: 'famille', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/3768131/pexels-photo-3768131.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-    {
-    id: 'w_tpl_famille_b_4', type: 'cercle', title: 'Famille recomposée : équilibre ou chaos ?',
-    description: 'Gérer les ex, les enfants des deux côtés, les nouvelles règles... Comment construire une nouvelle tribu harmonieuse ?',
-    detailedContent: 'La famille recomposée est une aventure complexe. Quels sont les plus grands défis que vous rencontrez ? Quelles sont vos plus belles réussites ?',
-    whyThisWorkshop: 'Pour partager des stratégies de communication et de gestion des émotions dans le contexte unique de la famille recomposée.',
-    participantExpectations: 'Partage d\'expériences concrètes et soutien mutuel.',
-    whatToGain: 'Des outils pour naviguer les défis et célébrer les joies de la vie en famille recomposée.',
-    xpActivated: ["Résilience", "Communication", "Patience", "Empathie", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'famille', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/7649242/pexels-photo-7649242.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- FAMILLE & QUOTIDIEN : Engager ---
-  {
-    id: 'w_tpl_famille_e_1', type: 'cercle', title: 'Transmission : ce que j’ai reçu, ce que je veux donner',
-    description: 'Faire le tri dans l\'héritage familial : ce qu\'on garde, ce qu\'on laisse, et ce qu\'on crée.',
-    detailedContent: 'Quelles sont les grandes forces que ta famille t\'a transmises ? Y a-t-il des "bagages" (croyances, peurs) dont tu aimerais te délester ?',
-    whyThisWorkshop: 'Pour devenir acteur de sa propre histoire, en choisissant consciemment ce que l\'on souhaite perpétuer.',
-    participantExpectations: 'Une exploration honnête de son héritage familial, avec bienveillance.',
-    whatToGain: 'La liberté de se définir au-delà de son héritage et de construire sa propre identité.',
-    xpActivated: ["Introspection", "Alignement", "Réflexion Critique", "Clarté émotionnelle", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'famille', requiredLevel: 'Engager', duration: "30 min", image: "https://images.pexels.com/photos/66258/pexels-photo-66258.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_famille_e_2', type: 'cercle', title: 'Rester ensemble “pour les enfants” : sacrifice ou sagesse ?',
-    description: 'Une question complexe qui pèse sur de nombreux couples. Explorons les motivations et les conséquences.',
-    detailedContent: 'Quand l\'amour s\'estompe mais que la famille est là, quel est le "bon" choix ? Discutons du sacrifice, du bonheur personnel et de l\'impact sur les enfants.',
-    whyThisWorkshop: 'Pour aborder un sujet tabou avec nuance et sans jugement, en écoutant des perspectives différentes.',
-    participantExpectations: 'Un partage respectueux sur un sujet qui peut être douloureux.',
-    whatToGain: 'Une vision plus large des différentes réalités et peut-être plus de paix avec sa propre situation.',
-    xpActivated: ["Réflexion Critique", "Empathie", "Gestion Émotionnelle", "Courage", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'famille', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/1034859/pexels-photo-1034859.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_famille_e_3', type: 'cercle', title: 'Pardonner à ses parents : possible ou non ?',
-    description: 'Le pardon est un chemin personnel. Est-il nécessaire pour avancer ? Et que signifie-t-il vraiment ?',
-    detailedContent: 'Pardonner, est-ce excuser ? Est-ce oublier ? Ou est-ce se libérer soi-même d\'un poids ? Explorons les différentes facettes du pardon parental.',
-    whyThisWorkshop: 'Pour cheminer sur la voie du pardon, à son propre rythme, en comprenant que ce n\'est pas une obligation.',
-    participantExpectations: 'Un partage vulnérable dans un cadre de sécurité et de non-jugement absolu.',
-    whatToGain: 'Une relation plus apaisée avec son histoire et des clés pour avancer, avec ou sans pardon.',
-    xpActivated: ["Vulnérabilité", "Auto-soutien", "Gestion Émotionnelle", "Résilience", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'famille', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/3784433/pexels-photo-3784433.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- PARENTALITÉ : Seeker ---
-  {
-    id: 'w_tpl_parentalite_s_1', type: 'cercle', title: 'Être parent, est-ce que ça change tout ?',
-    description: 'Devenir parent transforme la vie. Partageons nos découvertes, nos joies et nos difficultés.',
-    detailedContent: 'Qu\'est-ce que la parentalité a le plus changé en toi ? Tes priorités, ton couple, ton rapport au monde ?',
-    whyThisWorkshop: 'Pour normaliser les bouleversements de la parentalité et se sentir moins seul·e.',
-    participantExpectations: 'Un partage authentique sur les réalités de la vie de parent.',
-    whatToGain: 'Le sentiment de faire partie d\'une communauté qui comprend et un regard neuf sur son parcours.',
-    xpActivated: ["Partage", "Authenticité", "Soutien actif", "Écoute Active", "Respect de soi", "Ouverture", "Humour"], categoryKey: 'parentalite', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/164835/pexels-photo-164835.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_parentalite_s_2', type: 'cercle', title: 'Les clichés autour des “bons parents”',
-    description: 'Parent parfait, mère parfaite, père parfait... Déconstruisons ensemble ces mythes qui nous mettent la pression.',
-    detailedContent: 'Quelles sont les injonctions que tu ressens le plus en tant que parent ? Comment te libères-tu de la pression de la perfection ?',
-    whyThisWorkshop: 'Pour déculpabiliser et célébrer nos imperfections de parents.',
-    participantExpectations: 'Un échange libérateur sur la pression sociale et personnelle.',
-    whatToGain: 'Plus d\'auto-compassion et la permission d\'être un parent "suffisamment bon".',
-    xpActivated: ["Auto-soutien", "Réflexion Critique", "Humour", "Authenticité", "Partage", "Écoute Active", "Respect de soi"], categoryKey: 'parentalite', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/302083/pexels-photo-302083.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_parentalite_s_3', type: 'cercle', title: 'Enfants et réseaux sociaux : jusqu’où ?',
-    description: 'Partager des photos de ses enfants en ligne : fierté ou danger ? Trouvons le juste milieu.',
-    detailedContent: 'Quelle est ta politique personnelle sur le partage d\'images de tes enfants ? Quelles sont tes craintes et tes motivations ?',
-    whyThisWorkshop: 'Pour une réflexion collective sur le droit à l\'image et la protection de l\'intimité de nos enfants.',
-    participantExpectations: 'Un débat respectueux sur un sujet de société majeur.',
-    whatToGain: 'Des arguments pour affiner sa propre position et en parler sereinement en famille.',
-    xpActivated: ["Réflexion Critique", "Communication", "Respect de soi", "Authenticité", "Partage", "Écoute Active", "Ouverture"], categoryKey: 'parentalite', requiredLevel: 'Seeker', duration: "25 min", image: "https://images.pexels.com/photos/4145769/pexels-photo-4145769.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- PARENTALITÉ : Builder ---
-  {
-    id: 'w_tpl_parentalite_b_1', type: 'cercle', title: 'Être parent solo : défi ou force cachée ?',
-    description: 'Au-delà des difficultés, explorons la résilience, l\'autonomie et les forces uniques de la monoparentalité.',
-    detailedContent: 'Quels sont les plus grands défis de la parentalité solo ? Et quelles sont les forces insoupçonnées que tu as découvertes en toi ?',
-    whyThisWorkshop: 'Pour valoriser les parcours des parents solos et partager des ressources et du soutien.',
-    participantExpectations: 'Un échange constructif et solidaire.',
-    whatToGain: 'Un sentiment de fierté, de la reconnaissance et des astuces pour faciliter le quotidien.',
-    xpActivated: ["Résilience", "Auto-soutien", "Soutien actif", "Courage", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'parentalite', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/7282361/pexels-photo-7282361.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_parentalite_b_2', type: 'cercle', title: 'Partager la charge mentale dans le couple parental',
-    description: 'La fameuse charge mentale... Comment la rendre visible et la répartir plus équitablement ?',
-    detailedContent: 'Penser à tout, tout le temps. Comment faire comprendre à son partenaire le poids de cette charge invisible ? Quelles sont vos stratégies ?',
-    whyThisWorkshop: 'Pour transformer un sujet de conflit potentiel en un projet d\'équipe.',
-    participantExpectations: 'Partage d\'outils et de techniques de communication.',
-    whatToGain: 'Des actions concrètes pour un quotidien plus léger et un couple plus soudé.',
-    xpActivated: ["Communication", "Alignement", "Gestion Émotionnelle", "Authenticité", "Partage", "Écoute Active", "Respect de soi"], categoryKey: 'parentalite', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/4386341/pexels-photo-4386341.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- PARENTALITÉ : Engager ---
-  {
-    id: 'w_tpl_parentalite_e_1', type: 'cercle', title: 'Les tensions éducatives dans le couple',
-    description: 'Quand deux visions de l\'éducation s\'affrontent, comment trouver un terrain d\'entente pour le bien de l\'enfant ?',
-    detailedContent: 'Autorité vs bienveillance, limites strictes vs souplesse... Comment faire de vos différences une richesse plutôt qu\'une source de conflit ?',
-    whyThisWorkshop: 'Pour apprendre à dialoguer et à construire un projet éducatif commun et cohérent.',
-    participantExpectations: 'Une discussion constructive sur la communication et le compromis.',
-    whatToGain: 'Des clés pour harmoniser ses pratiques éducatives et renforcer son alliance parentale.',
-    xpActivated: ["Communication", "Alignement", "Empathie", "Réflexion Critique", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'parentalite', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/5879321/pexels-photo-5879321.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 'w_tpl_parentalite_e_2', type: 'cercle', title: 'Mes erreurs de parent que je voudrais transformer',
-    description: 'Personne n\'est parfait. Partageons avec vulnérabilité les moments où nous avons l\'impression d\'avoir échoué, et comment nous pouvons grandir.',
-    detailedContent: 'Un mot de trop, une réaction disproportionnée... Quels sont ces moments que tu regrettes et qu\'est-ce qu\'ils t\'apprennent sur toi ?',
-    whyThisWorkshop: 'Pour déculpabiliser et voir nos erreurs comme des opportunités d\'apprentissage.',
-    participantExpectations: 'Un partage courageux dans un espace de non-jugement absolu.',
-    whatToGain: 'Plus de compassion pour soi-même et des pistes pour réparer et faire mieux la prochaine fois.',
-    xpActivated: ["Vulnérabilité", "Résilience", "Auto-soutien", "Courage", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'parentalite', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/4098228/pexels-photo-4098228.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-    // --- QUOTIDIEN & MOI: Seeker (using 'famille' key) ---
-  {
-    id: 'w_tpl_moi_s_1', type: 'cercle', title: 'La solitude : choix ou contrainte ?',
-    description: 'Moment de ressourcement pour certains, poids pour d\'autres. Explorons notre rapport à la solitude.',
-    detailedContent: 'Comment vis-tu les moments où tu es seul·e ? Est-ce que tu les recherches ou tu les fuis ? Qu\'est-ce que la solitude t\'apprend sur toi ?',
-    whyThisWorkshop: 'Pour dédramatiser la solitude et la transformer en une alliée pour mieux se connaître.',
-    participantExpectations: 'Partage d\'expériences personnelles sur la solitude, sans jugement.',
-    whatToGain: 'Un rapport plus apaisé à la solitude et des idées pour l\'apprivoiser.',
-    xpActivated: ["Introspection", "Auto-soutien", "Authenticité", "Partage", "Écoute Active", "Respect de soi", "Ouverture"], categoryKey: 'famille', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/3831847/pexels-photo-3831847.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- QUOTIDIEN & MOI: Builder (using 'famille' key) ---
-  {
-    id: 'w_tpl_moi_b_1', type: 'cercle', title: 'Poser mes limites sans culpabiliser',
-    description: 'Dire non, c\'est souvent se dire oui à soi. Apprenons ensemble à le faire avec bienveillance.',
-    detailedContent: 'Qu\'est-ce qui te rend difficile de dire non ? La peur de décevoir, de blesser, d\'être rejeté·e ? Dans quelle situation aimerais-tu poser plus clairement tes limites ?',
-    whyThisWorkshop: 'Pour comprendre que poser ses limites est un acte d\'amour-propre et une condition pour des relations saines.',
-    participantExpectations: 'Un espace pour partager ses peurs et s\'entraîner à formuler ses limites.',
-    whatToGain: 'Le courage et les mots pour dire non plus facilement, et des relations plus respectueuses.',
-    xpActivated: ["Respect de soi", "Affirmation de soi", "Courage", "Communication", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'famille', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/5699475/pexels-photo-5699475.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-    // --- QUOTIDIEN & MOI: Engager (using 'famille' key) ---
-  {
-    id: 'w_tpl_moi_e_1', type: 'cercle', title: 'Burn-out émotionnel : en ai-je déjà vécu un ?',
-    description: 'Quand le cœur et la tête sont à plat. Reconnaître les signes de l\'épuisement émotionnel.',
-    detailedContent: 'As-tu déjà ressenti un épuisement qui n\'était pas que physique ? Quels étaient les signes ? Comment en es-tu sorti·e ?',
-    whyThisWorkshop: 'Pour mettre des mots sur un mal souvent silencieux et partager des ressources pour prévenir et guérir.',
-    participantExpectations: 'Un partage vulnérable et un soutien mutuel pour reconnaître et valider ces expériences.',
-    whatToGain: 'Une meilleure capacité à identifier les signes du burn-out émotionnel et des stratégies d\'auto-soin.',
-    xpActivated: ["Auto-soutien", "Vulnérabilité", "Soutien actif", "Gestion Émotionnelle", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'famille', requiredLevel: 'Engager', duration: "30 min", image: "https://images.pexels.com/photos/3807746/pexels-photo-3807746.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- TRAVAIL & SOCIETE: Seeker ---
-  {
-    id: 'w_tpl_travail_s_1', type: 'cercle', title: 'Le télétravail : liberté ou isolement ?',
-    description: 'Le travail à domicile a ses avantages et ses inconvénients. Comment trouver le bon équilibre pour soi ?',
-    detailedContent: 'Le télétravail est-il pour toi synonyme de flexibilité et de concentration, ou de solitude et de déconnexion avec l\'équipe ?',
-    whyThisWorkshop: 'Pour partager les meilleures pratiques et les défis du travail à distance.',
-    participantExpectations: 'Un échange d\'expériences et d\'astuces pour bien vivre le télétravail.',
-    whatToGain: 'Des stratégies pour rester connecté et productif, tout en préservant son bien-être.',
-    xpActivated: ["Partage", "Auto-soutien", "Communication", "Authenticité", "Écoute Active", "Respect de soi", "Ouverture"], categoryKey: 'travail', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/4050319/pexels-photo-4050319.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- TRAVAIL & SOCIETE: Builder ---
-  {
-    id: 'w_tpl_travail_b_1', type: 'cercle', title: 'Comment gérer mon image pro / perso ?',
-    description: 'Entre LinkedIn et Instagram, comment rester authentique sans compromettre son image professionnelle ?',
-    detailedContent: 'Faut-il avoir deux personnalités, une pour le bureau et une pour la vie privée ? Où se situe la frontière ?',
-    whyThisWorkshop: 'Pour réfléchir à une manière plus alignée et moins stressante de gérer ses différentes facettes en ligne et hors ligne.',
-    participantExpectations: 'Un partage d\'expériences sur la gestion de son image à l\'ère numérique.',
-    whatToGain: 'Plus d\'authenticité et de cohérence dans sa communication.',
-    xpActivated: ["Authenticité", "Alignement", "Réflexion Critique", "Partage", "Écoute Active", "Respect de soi", "Ouverture"], categoryKey: 'travail', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/5668858/pexels-photo-5668858.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- TRAVAIL & SOCIETE: Engager ---
-  {
-    id: 'w_tpl_travail_e_1', type: 'cercle', title: 'Stress et anxiété liés au travail',
-    description: 'Quand la pression devient trop forte. Partageons nos expériences et nos stratégies pour faire face.',
-    detailedContent: 'Comment le stress lié au travail se manifeste-t-il chez toi ? Quelles sont tes soupapes de décompression ?',
-    whyThisWorkshop: 'Pour briser l\'isolement face au stress professionnel et trouver du soutien collectif.',
-    participantExpectations: 'Un partage bienveillant de nos vulnérabilités professionnelles.',
-    whatToGain: 'Des techniques de gestion du stress et le sentiment de ne pas être seul·e.',
-    xpActivated: ["Gestion Émotionnelle", "Soutien actif", "Vulnérabilité", "Auto-soutien", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'travail', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/313690/pexels-photo-313690.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- ÂGE & TRANSMISSION: Seeker ---
-  {
-    id: 'w_tpl_age_s_1', type: 'cercle', title: 'Vieillir : peur ou sagesse ?',
-    description: 'Notre société valorise la jeunesse. Comment développer un rapport plus apaisé et positif à l\'idée de vieillir ?',
-    detailedContent: 'Que représente pour toi le fait de prendre de l\'âge ? Est-ce une source d\'angoisse ou une promesse d\'expérience et de sérénité ?',
-    whyThisWorkshop: 'Pour changer notre regard sur le vieillissement et y voir une opportunité de croissance.',
-    participantExpectations: 'Un partage honnête de nos peurs et de nos espoirs face au temps qui passe.',
-    whatToGain: 'Une vision plus sereine de l\'avenir et l\'envie de célébrer chaque étape de la vie.',
-    xpActivated: ["Réflexion Critique", "Gestion Émotionnelle", "Ouverture", "Authenticité", "Partage", "Écoute Active", "Respect de soi"], categoryKey: 'quarantaine', requiredLevel: 'Seeker', duration: "20 min", image: "https://images.pexels.com/photos/3768126/pexels-photo-3768126.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- ÂGE & TRANSMISSION: Builder ---
-  {
-    id: 'w_tpl_age_b_1', type: 'cercle', title: 'Se réinventer après 40 ans',
-    description: 'Carrière, relations, passions... La moitié de la vie est souvent un moment de bilan et de nouveaux départs.',
-    detailedContent: 'Ressens-tu l\'envie ou le besoin de changer des choses importantes dans ta vie ? Qu\'est-ce qui te freine et qu\'est-ce qui te motive ?',
-    whyThisWorkshop: 'Pour s\'inspirer mutuellement et trouver le courage de se réinventer, peu importe son âge.',
-    participantExpectations: 'Partage d\'histoires de transformation et de rêves pour l\'avenir.',
-    whatToGain: 'De l\'inspiration, de la motivation et la conviction qu\'il n\'est jamais trop tard pour changer.',
-    xpActivated: ["Courage", "Alignement", "Partage", "Soutien actif", "Authenticité", "Écoute Active", "Respect de soi"], categoryKey: 'quarantaine', requiredLevel: 'Builder', duration: "25 min", image: "https://images.pexels.com/photos/2228580/pexels-photo-2228580.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  // --- ÂGE & TRANSMISSION: Engager ---
-  {
-    id: 'w_tpl_age_e_1', type: 'cercle', title: 'La solitude affective après 45 ans',
-    description: 'Quand les enfants sont grands et que le couple n\'est plus, comment réinventer sa vie affective ?',
-    detailedContent: 'La solitude à cet âge peut être particulièrement pesante. Comment faire de nouvelles rencontres amicales ou amoureuses ? Comment se sentir bien avec soi-même ?',
-    whyThisWorkshop: 'Pour rompre l\'isolement et partager des stratégies pour une vie sociale et affective épanouie.',
-    participantExpectations: 'Un échange authentique et solidaire sur un sujet souvent tabou.',
-    whatToGain: 'De l\'espoir, des pistes concrètes et le sentiment de faire partie d\'une communauté.',
-    xpActivated: ["Soutien actif", "Vulnérabilité", "Résilience", "Partage", "Authenticité", "Écoute Active", "Respect de soi"], categoryKey: 'quarantaine', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/5408902/pexels-photo-5408902.jpeg?auto=compress&cs=tinysrgb&w=400",
+    xpActivated: ["Gestion Émotionnelle", "Introspection", "Vulnérabilité", "Communication", "Authenticité", "Partage", "Écoute Active"], categoryKey: 'amour', requiredLevel: 'Engager', isPremium: true, duration: "30 min", image: "https://images.pexels.com/photos/1586252/pexels-photo-15",
   },
 ];
+// FIX: Add the missing generateMockFeedData function and export it.
+export const generateMockFeedData = (count: number = 20): ActivityFeedItem[] => {
+    const items: ActivityFeedItem[] = [];
+    for (let i = 0; i < count; i++) {
+        const gender = Math.random() > 0.5 ? 'female' : 'male';
+        const name = gender === 'female' 
+            ? FEMALE_AI_NAMES[Math.floor(Math.random() * FEMALE_AI_NAMES.length)]
+            : MALE_AI_NAMES[Math.floor(Math.random() * MALE_AI_NAMES.length)];
+        const avatarUrl = gender === 'female'
+            ? FEMALE_AI_AVATAR_URLS[Math.floor(Math.random() * FEMALE_AI_AVATAR_URLS.length)]
+            : MALE_AI_AVATAR_URLS[Math.floor(Math.random() * MALE_AI_AVATAR_URLS.length)];
+        const totalXP = Math.floor(Math.random() * 800) + 100;
 
-
-function shuffleArray<T>(array: T[]): T[] {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
-export const generateMockFeedData = (): ActivityFeedItem[] => {
-    const feedItems: ActivityFeedItem[] = [];
-    const now = new Date();
-
-    const shuffledWorkshops = shuffleArray([...WORKSHOP_TEMPLATES]);
-    const shuffledXpTypes = shuffleArray([...EMOTIONAL_XP_TYPES]);
-    
-    const allAIs = [
-        ...FEMALE_AI_NAMES.map((name, i) => ({ name, gender: 'female' as const, avatarUrl: FEMALE_AI_AVATAR_URLS[i % FEMALE_AI_AVATAR_URLS.length] })),
-        ...MALE_AI_NAMES.map((name, i) => ({ name, gender: 'male' as const, avatarUrl: MALE_AI_AVATAR_URLS[i % MALE_AI_AVATAR_URLS.length] }))
-    ];
-    const shuffledAIs = shuffleArray(allAIs);
-
-    const createMockProfile = (ai: { name: string; gender: 'female' | 'male'; avatarUrl: string }): ParticipantProfileInfo => {
-        const totalXP = Math.floor(Math.random() * 800) + 50;
-        const currentLevel = getLevelFromXP(totalXP);
-        const badges: Badge[] = [];
-        if (totalXP > 150) badges.push({ id: 'b_builder_path', name: 'Constructeur Engagé', icon: '🛠️' });
-        if (Math.random() > 0.6) badges.push({ id: 'b_empathy', name: 'Écoute Active', icon: '👂' });
-
-        return {
-            name: ai.name,
-            totalXP,
-            currentLevel,
+        const userProfile: ParticipantProfileInfo = {
+            name,
+            gender,
+            avatarUrl,
             isAI: true,
-            workshopsAttended: Math.floor(Math.random() * 20) + 3,
-            badges,
-            activityStatus: "Actif récemment",
-            gender: ai.gender,
-            avatarUrl: ai.avatarUrl,
-            profession: ["Développeur", "Designer", "Coach", "Artiste", "Thérapeute", "Étudiant"][Math.floor(Math.random()*6)],
-            hobbies: [["Lecture", "Randonnée"], ["Cinéma", "Cuisine"], ["Musique", "Voyage"]][Math.floor(Math.random()*3)],
-            biography: "Passionné·e par la compréhension humaine et les connexions authentiques. Toujours en quête d'apprentissage et de partage."
+            totalXP,
+            currentLevel: getLevelFromXP(totalXP),
+            awardedXpCounts: {},
         };
-    };
 
-    // 1. Join workshop activity (3 items)
-    for (let i = 0; i < 3; i++) {
-        if (shuffledWorkshops.length > i && shuffledAIs.length > i) {
-            const ai = shuffledAIs[i];
-            const workshop = shuffledWorkshops[i];
-            const userProfile = createMockProfile(ai);
-            feedItems.push({
-                id: `feed-join-${i}`,
-                userProfile,
-                activityType: 'joined_workshop',
-                details: {
-                    workshopTitle: workshop.title,
-                    workshopId: workshop.id,
-                },
-                timestamp: new Date(now.getTime() - (i * 3 + Math.random() * 2) * 60 * 60 * 1000),
-            });
+        const activityType: ActivityFeedItem['activityType'] = ['joined_workshop', 'earned_xp', 'completed_workshop'][Math.floor(Math.random() * 3)] as ActivityFeedItem['activityType'];
+        
+        let details: ActivityFeedItem['details'] = {};
+        if (activityType === 'joined_workshop' || activityType === 'completed_workshop') {
+            details = { workshopTitle: WORKSHOP_TEMPLATES[Math.floor(Math.random() * WORKSHOP_TEMPLATES.length)].title };
+        } else {
+            const xpType = EMOTIONAL_XP_TYPES[Math.floor(Math.random() * EMOTIONAL_XP_TYPES.length)];
+            details = { xpAmount: [5, 10, 15][Math.floor(Math.random() * 3)], xpType: xpType.name };
         }
-    }
 
-    // 2. Earn XP activity (2 items)
-    for (let i = 0; i < 2; i++) {
-        if (shuffledXpTypes.length > i && shuffledAIs.length > i + 3) {
-            const ai = shuffledAIs[i + 3];
-            const xpType = shuffledXpTypes[i];
-            const userProfile = createMockProfile(ai);
-            feedItems.push({
-                id: `feed-xp-${i}`,
-                userProfile,
-                activityType: 'earned_xp',
-                details: {
-                    xpType: xpType.name,
-                    xpAmount: Math.random() > 0.5 ? 5 : 10,
-                },
-                timestamp: new Date(now.getTime() - (i * 2 + Math.random()) * 60 * 60 * 1000),
-            });
-        }
-    }
-    
-    // 3. Complete workshop activity (1 item)
-    if (shuffledWorkshops.length > 3 && shuffledAIs.length > 5) {
-        const ai = shuffledAIs[5];
-        const workshop = shuffledWorkshops[3];
-        const userProfile = createMockProfile(ai);
-        feedItems.push({
-            id: `feed-complete-1`,
+        items.push({
+            id: `feed-${i}-${Date.now()}`,
+            timestamp: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 3), // within last 3 days
             userProfile,
-            activityType: 'completed_workshop',
-            details: {
-                workshopTitle: workshop.title,
-                workshopId: workshop.id,
-            },
-            timestamp: new Date(now.getTime() - (Math.random() * 24) * 60 * 60 * 1000),
+            activityType,
+            details,
         });
     }
-
-    return feedItems.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return items.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 };

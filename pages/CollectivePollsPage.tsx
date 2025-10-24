@@ -14,7 +14,6 @@ interface Poll {
 }
 
 // Mock data for the poll
-// FIX: Add explicit type 'Poll' to initialPollData to ensure type safety.
 const initialPollData: Poll = {
   id: 1,
   question: "Quand vous sentez-vous le plus authentique ?",
@@ -29,14 +28,12 @@ const initialPollData: Poll = {
 
 const CollectivePollsPage: React.FC = () => {
   const navigate = useNavigate();
-  // Explicitly type the state with the 'Poll' interface to ensure type safety.
-  // FIX: Explicitly type useState with 'Poll' to resolve type inference issues.
   const [poll, setPoll] = useState<Poll>(initialPollData);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
 
-  // With proper types, `reduce` is correctly inferred and totalVotes will be a number, fixing "Operator '+' cannot be applied to types 'unknown' and 'unknown'".
-  const totalVotes = Object.values(poll.results).reduce((sum, count) => sum + count, 0);
+  // FIX: Explicitly cast `count` to Number to prevent `unknown` type errors in reduce.
+  const totalVotes = Object.values(poll.results).reduce((sum, count) => sum + Number(count), 0);
 
   const handleVote = () => {
     if (!selectedOption) return;
@@ -44,8 +41,8 @@ const CollectivePollsPage: React.FC = () => {
     // Update the results in state
     setPoll(prevPoll => {
       const newResults = { ...prevPoll.results };
-      // Type safety allows direct incrementation without casting.
-      newResults[selectedOption]++;
+      // FIX: Use explicit addition and Number casting to avoid `unknown` type error with increment operator.
+      newResults[selectedOption] = Number(newResults[selectedOption]) + 1;
       return { ...prevPoll, results: newResults };
     });
     setHasVoted(true);
@@ -66,10 +63,9 @@ const CollectivePollsPage: React.FC = () => {
           <div className="space-y-4">
             <h3 className="text-md font-semibold text-center text-gray-700 mb-2">Résultats de la communauté :</h3>
             {poll.options.map(option => {
-              // With proper types, access is safer and no casting is needed.
               const votesForOption = poll.results[option.id];
-              // This calculation now works because all variables are numbers, fixing "Operator '>' cannot be applied" and "right-hand side of an arithmetic operation must be of type 'any', 'number'..." errors.
-              const percentage = totalVotes > 0 ? ((votesForOption / totalVotes) * 100).toFixed(1) : "0.0";
+              // FIX: Explicitly cast `votesForOption` to Number to prevent `unknown` type errors in arithmetic operations.
+              const percentage = totalVotes > 0 ? ((Number(votesForOption) / totalVotes) * 100).toFixed(1) : "0.0";
               const isSelected = option.id === selectedOption;
 
               return (

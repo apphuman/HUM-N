@@ -1,5 +1,9 @@
 
 
+
+
+
+
 import React, { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -18,7 +22,8 @@ import WorkshopLobbyPage from './pages/WorkshopLobbyPage'; // Import new lobby p
 import MicroChallengesPage from './pages/MicroChallengesPage';
 import CollectivePollsPage from './pages/CollectivePollsPage';
 import SoloWorkshopPage from './pages/SoloWorkshopPage';
-import { UserProfile, LiveWorkshopGlobalState, WorkshopTheme, ChatMessage, ParticipantProfileInfo, Badge, WorkshopSummaryData, XPAwardSummary, XPAwardedToAISummary, OnboardingData, AIMatchData, AIMatchProfile, PrivateChatMessage, PrivateChatSessionState, LevelInfo, UserJourneySummary, ProfessionCategoryOptions, AgeRanges, PreferredRythmOptions, SocialInteractionStyleOptions, ReactionToTouchedOptions, UserCreatedWorkshopDetails, ProfessionCategory, SystemAwardedSpecificXP, Notification, WorkshopCategoryKey, Persona, SoloWorkshopState, ActivityFeedItem, FictionalSpecialistProfile, AppFeatureUpdate } from './types';
+// FIX: A large number of types were not exported from types.ts. They have been added and exported.
+import { UserProfile, LiveWorkshopGlobalState, WorkshopTheme, ChatMessage, ParticipantProfileInfo, Badge, WorkshopSummaryData, OnboardingData, AIMatchData, AIMatchProfile, PrivateChatMessage, PrivateChatSessionState, LevelInfo, UserJourneySummary, ProfessionCategoryOptions, AgeRanges, PreferredRythmOptions, SocialInteractionStyleOptions, ReactionToTouchedOptions, UserCreatedWorkshopDetails, ProfessionCategory, SystemAwardedSpecificXP, Notification, WorkshopCategoryKey, Persona, SoloWorkshopState, ActivityFeedItem, FictionalSpecialistProfile, AppFeatureUpdate, XPAwardSummary, XPAwardedToAISummary } from './types';
 import AnimatedAppLoader from './AnimatedAppLoader'; // Importation du chargeur
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 import { 
@@ -35,6 +40,7 @@ import {
     AI_RELANCE_INACTIVITY_WINDOW_MINUTES,
     AI_RELANCE_CHANCE_ON_CHECK,
     AI_RELANCE_CHECK_INTERVAL_MS,
+// FIX: generateMockFeedData was not exported from constants.ts. It has been added and exported.
     generateMockFeedData,
     ECHOS_SUBMISSIONS_STORAGE_KEY,
     MOCK_SPECIALISTS,
@@ -386,6 +392,78 @@ const AppWithRouterContext: React.FC = () => {
     liveWorkshopGlobalStateRef.current = liveWorkshopGlobalState;
   }, [liveWorkshopGlobalState]);
 
+  const userProfileRef = useRef<UserProfile | null>(null);
+  useEffect(() => {
+    userProfileRef.current = userProfile;
+  }, [userProfile]);
+
+  // Inactivity check for live workshops
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      const state = liveWorkshopGlobalStateRef.current;
+      const currentUser = userProfileRef.current;
+
+      if (state && state.chatSession && !state.isLoading && currentUser && !isGeneratingSummary && !workshopSummaryData) {
+        const INACTIVITY_THRESHOLD_MS = 3 * 60 * 1000; // 3 minutes
+        const now = Date.now();
+        const lastUserMessageTime = state.lastUserMessageTimestamp || 0;
+
+        if (now - lastUserMessageTime > INACTIVITY_THRESHOLD_MS && !state.isRelanceProposed) {
+          setLiveWorkshopGlobalState(prev => prev ? { ...prev, isRelanceProposed: true, typingParticipantName: 'Humānia' } : null);
+
+          try {
+            const genderedStrings = getGenderedStrings(currentUser.gender);
+            const relancePrompt = `Humānia, ${currentUser.firstName} est silencieux·se depuis un moment. Peux-tu lui adresser un message court, doux et bienveillant pour voir si tout va bien et l'inviter à partager à nouveau quand ${genderedStrings.il_elle} se sentira prêt·e ? Quelque chose comme "Tout va bien, ${currentUser.firstName} ?"`;
+            
+            const response = await state.chatSession.sendMessage({ message: relancePrompt });
+            const aiFullResponse = response.text;
+            
+            const aiMessages: ChatMessage[] = [];
+            const regex = /([\wÀ-ÿ]+):\s*([\s\S]*?)(?=[\wÀ-ÿ]+:|$)/g;
+            let match;
+            while ((match = regex.exec(aiFullResponse)) !== null) {
+              const sender = match[1].trim();
+              const text = match[2].trim();
+              if (sender && text && state.aiParticipants.includes(sender)) {
+                aiMessages.push({
+                  id: `ai-relance-${Date.now()}-${aiMessages.length}`,
+                  sender,
+                  text,
+                  timestamp: new Date(),
+                  isUser: false,
+                });
+              }
+            }
+            
+            if (aiMessages.length === 0 && aiFullResponse.trim()) {
+              const moderatorName = 'Humānia'; // Hardcode for relance
+              aiMessages.push({
+                id: `ai-relance-fallback-${Date.now()}`,
+                sender: moderatorName,
+                text: aiFullResponse.replace(`${moderatorName}:`, '').trim(),
+                timestamp: new Date(),
+                isUser: false,
+              });
+            }
+
+            setTimeout(() => {
+              setLiveWorkshopGlobalState(prev => {
+                if (!prev) return null;
+                return { ...prev, messages: [...prev.messages, ...aiMessages], typingParticipantName: null };
+              });
+            }, 1000 + Math.random() * 800);
+
+          } catch (error) {
+            console.error("Error sending inactivity relance:", error);
+            setLiveWorkshopGlobalState(prev => prev ? { ...prev, isRelanceProposed: false, typingParticipantName: null } : null);
+          }
+        }
+      }
+    }, 45 * 1000); // Check every 45 seconds
+
+    return () => clearInterval(intervalId);
+  }, [isGeneratingSummary, workshopSummaryData]);
+
   const notifiedWorkshopIdsRef = useRef<Set<string>>(new Set());
   const isGeneratingRelanceRef = useRef(false);
 
@@ -402,6 +480,16 @@ const AppWithRouterContext: React.FC = () => {
 
   useEffect(() => {
     setFeedItems(generateMockFeedData());
+  }, []);
+
+  // Auto-refresh workshops every 5 minutes
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+        // This will trigger the workshop regeneration useEffect, effectively refreshing available workshops
+        setWorkshopGenerationTrigger(prev => prev + 1);
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(intervalId); // Cleanup on component unmount
   }, []);
 
   useEffect(() => {
@@ -505,6 +593,7 @@ const AppWithRouterContext: React.FC = () => {
         biography: selectedPersona.present,
         personaKey: selectedPersona.key,
         age: selectedPersona.age,
+        awardedXpCounts: {},
     };
 
     return {
@@ -546,6 +635,7 @@ const AppWithRouterContext: React.FC = () => {
         biography: persona.present,
         personaKey: persona.key,
         age: persona.age,
+        awardedXpCounts: {},
     };
 
     return {
@@ -743,6 +833,7 @@ const AppWithRouterContext: React.FC = () => {
       positiveRequests: [],
       myManualText: '',
       datingPreferences: data.datingPreferences,
+      profilePicture: data.profilePicture,
     };
     setUserProfile(newUserProfile);
     localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(newUserProfile));
@@ -854,7 +945,15 @@ const handleSendMessage = useCallback(async (messageText: string, user: UserProf
 
     const userMessage: ChatMessage = { id: `user-${Date.now()}`, sender: user.firstName, text: messageText, timestamp: new Date(), isUser: true };
     
-    setLiveWorkshopGlobalState(prev => prev ? { ...prev, messages: [...prev.messages, userMessage], isLoading: true, typingParticipantName: "IA", lastUserMessageTimestamp: Date.now() } : null);
+    setLiveWorkshopGlobalState(prev => prev ? { 
+        ...prev, 
+        messages: [...prev.messages, userMessage], 
+        isLoading: true, 
+        typingParticipantName: "IA", 
+        lastUserMessageTimestamp: Date.now(),
+        isRelanceProposed: false,
+        isClosureProposedDueToInactivity: false
+    } : null);
 
     try {
         const response = await currentState.chatSession.sendMessage({ message: messageText });

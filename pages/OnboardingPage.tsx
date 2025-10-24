@@ -12,8 +12,9 @@ import {
     DatingGoal, DatingGoalOptions,
     DatingSelfPerception, DatingSelfPerceptionOptions
 } from '../types';
-import { HumanLogo, CheckIcon } from '../components/icons';
+import { HumanLogo, CheckIcon, WorkshopsIcon, TrendingUpIcon, EchosIcon, AffinitiesIcon, LightBulbIcon, CameraIcon, ArrowLeftIcon } from '../components/icons';
 import { GENDER_OPTIONS, getGenderedStrings } from '../constants';
+import Avatar from '../components/Avatar';
 
 interface OnboardingPageProps {
   onOnboardingComplete: (profileData: OnboardingData) => void;
@@ -56,6 +57,7 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
   const [location, setLocation] = useState('');
   const [preferNotToSayLocation, setPreferNotToSayLocation] = useState(false);
   const [socialInteractionStyle, setSocialInteractionStyle] = useState<SocialInteractionStyle | null>(null);
+  const [profilePicture, setProfilePicture] = useState<string | undefined>();
 
   // New state for dating questions
   const [datingStep, setDatingStep] = useState(0);
@@ -68,8 +70,9 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
 
   const [isExiting, setIsExiting] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const totalSteps = 7;
+  const totalSteps = 12;
   const gendered = getGenderedStrings(gender || 'prefer_not_to_say');
 
   const changeStep = (nextStep: number) => {
@@ -127,6 +130,7 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
       location: preferNotToSayLocation ? 'Non spécifié' : location,
       onboardingIntentText,
       datingPreferences,
+      profilePicture,
     });
   };
 
@@ -137,6 +141,23 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
         case 'sensible': return "Merci. Je sens une belle ouverture, une envie d'explorer en profondeur.";
         case 'texte_libre': return "Merci pour tes mots. C'est un excellent point de départ.";
         default: return "Merci pour ce partage.";
+    }
+  };
+  
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setProfilePicture(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -166,6 +187,14 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
             }
         }
     };
+    
+    const BackButton = () => (
+      <div className="text-center">
+        <button onClick={() => changeStep(step - 1)} className="mt-3 text-sm text-gray-500 hover:text-gray-700">
+          Retour
+        </button>
+      </div>
+    );
 
     switch (step) {
       case 0:
@@ -178,18 +207,86 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
           </div>
         );
 
-      case 1:
+      case 1: // NEW - How it works Intro
+        return (
+          <div key={step} className={`p-8 flex flex-col items-center justify-center text-center h-full ${animationClass}`}>
+            <LightBulbIcon className="w-16 h-16 text-amber-400 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">Comment ça marche ?</h2>
+            <p className="text-gray-600 leading-relaxed max-w-sm mb-8">HUMĀN est un parcours en quelques étapes simples pour t'aider à mieux te connaître et à créer des liens authentiques.</p>
+            <div className="w-full max-w-xs">
+              <StyledButton size="lg" onClick={() => changeStep(2)} fullWidth>Découvrir</StyledButton>
+              <BackButton />
+            </div>
+          </div>
+        );
+
+      case 2: // NEW - Ateliers
+        return (
+          <div key={step} className={`p-8 flex flex-col items-center justify-center text-center h-full ${animationClass}`}>
+            <WorkshopsIcon className="w-16 h-16 text-orange-500 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">1. Les Ateliers</h2>
+            <p className="text-gray-600 leading-relaxed max-w-sm mb-8">Partage tes expériences dans des cercles de parole bienveillants, animés par des participantes et participants virtuels, pour explorer des thèmes qui te touchent.</p>
+            <div className="w-full max-w-xs">
+              <StyledButton size="lg" onClick={() => changeStep(3)} fullWidth>Suivant</StyledButton>
+              <BackButton />
+            </div>
+          </div>
+        );
+
+      case 3: // NEW - XP & Progression
+        return (
+          <div key={step} className={`p-8 flex flex-col items-center justify-center text-center h-full ${animationClass}`}>
+            <TrendingUpIcon className="w-16 h-16 text-green-500 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">2. Les XP & la Progression</h2>
+            <p className="text-gray-600 leading-relaxed max-w-sm mb-8">Ton engagement est valorisé. Gagne des points d'expérience (XP), monte en niveau et débloque de nouvelles possibilités.</p>
+            <div className="w-full max-w-xs">
+              <StyledButton size="lg" onClick={() => changeStep(4)} fullWidth>Suivant</StyledButton>
+              <BackButton />
+            </div>
+          </div>
+        );
+
+      case 4: // NEW - Échos & Affinités
+        return (
+          <div key={step} className={`p-8 flex flex-col items-center justify-center text-center h-full ${animationClass}`}>
+            <div className="flex space-x-6">
+                <EchosIcon className="w-16 h-16 text-blue-500 mb-4" />
+                <AffinitiesIcon className="w-16 h-16 text-purple-500 mb-4" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">3. Échos & Affinités</h2>
+            <p className="text-gray-600 leading-relaxed max-w-sm mb-8">Dépose tes pensées, découvre des résonances avec la communauté et crée des liens profonds avec des personnes qui te comprennent.</p>
+            <div className="w-full max-w-xs">
+              <StyledButton size="lg" onClick={() => changeStep(5)} fullWidth>Compris !</StyledButton>
+              <BackButton />
+            </div>
+          </div>
+        );
+
+      case 5: // NEW - Ready?
+        return (
+          <div key={step} className={`p-8 flex flex-col items-center justify-center text-center h-full ${animationClass}`}>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">Prêt·e à commencer ?</h2>
+            <p className="text-gray-600 leading-relaxed max-w-sm mb-8">Maintenant, quelques questions pour personnaliser ton parcours. Il n'y a pas de bonnes ou de mauvaises réponses.</p>
+            <div className="w-full max-w-xs">
+              <StyledButton size="lg" onClick={() => changeStep(6)} fullWidth>C'est parti</StyledButton>
+              <BackButton />
+            </div>
+          </div>
+        );
+
+      case 6: // Was 1
         return (
           <div key={step} className={`p-6 ${animationClass}`}>
             <h2 className="text-xl font-semibold text-center text-gray-800 mb-6">Pour commencer, comment puis-je t’appeler ?</h2>
             <div className="max-w-xs mx-auto">
               <input autoFocus type="text" value={firstName} onChange={e => setFirstName(e.target.value)} className="form-input text-center text-lg" placeholder="Ton prénom" />
-              <StyledButton fullWidth onClick={() => changeStep(2)} disabled={!firstName.trim()} className="mt-4">Continuer</StyledButton>
+              <StyledButton fullWidth onClick={() => changeStep(7)} disabled={!firstName.trim()} className="mt-4">Continuer</StyledButton>
+              <BackButton />
             </div>
           </div>
         );
 
-      case 2:
+      case 7: // Was 2
         return (
           <div key={step} className={`p-6 ${animationClass}`}>
             <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">Ravi de te rencontrer, {firstName}.</h2>
@@ -218,22 +315,52 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
             <StyledButton fullWidth onClick={handleIntentSubmit} disabled={selectedIntents.length === 0 || (selectedIntents.includes('Autre...') && !onboardingIntentText.trim())} className="mt-6">
               Valider mon intention
             </StyledButton>
+            <BackButton />
           </div>
         );
 
-      case 3:
+      case 8: // Was 3
         return (
           <div key={step} className={`p-8 flex flex-col items-center justify-center text-center h-full ${animationClass}`}>
             <p className="text-lg text-gray-600 leading-relaxed max-w-sm mb-6">{getMirrorMessage()}</p>
             <p className="text-xl font-bold text-green-600 bg-green-100/50 px-4 py-2 rounded-full">+10 XP Authenticité ✨</p>
-            <StyledButton onClick={() => changeStep(4)} className="mt-8">Continuer</StyledButton>
+            <div className="w-full max-w-xs mt-8">
+              <StyledButton onClick={() => changeStep(9)} fullWidth>Continuer</StyledButton>
+              <BackButton />
+            </div>
           </div>
         );
 
-      case 4:
+      case 9: // Was 4
         return (
           <div key={step} className={`p-6 space-y-5 ${animationClass}`}>
             <h2 className="text-xl font-semibold text-center text-gray-800">Quelques informations sur toi</h2>
+            <div className="flex flex-col items-center">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className="hidden"
+                    accept="image/png, image/jpeg, image/webp"
+                />
+                <label className="form-label text-center">Ta photo de profil (optionnel)</label>
+                <button
+                    type="button"
+                    onClick={handleAvatarClick}
+                    className="group relative w-24 h-24 mx-auto rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-400"
+                >
+                    <Avatar 
+                        name={firstName} 
+                        gender={gender || 'prefer_not_to_say'}
+                        imageUrl={profilePicture}
+                        className="w-full h-full"
+                        isAI={false}
+                    />
+                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <CameraIcon className="w-8 h-8 text-white" />
+                    </div>
+                </button>
+            </div>
             <div>
               <label className="form-label">Ton genre</label>
               <select value={gender} onChange={e => setGender(e.target.value as UserProfile['gender'])} className="form-select">
@@ -255,11 +382,12 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
                 <label htmlFor="preferNotToSay" className="ml-2 text-sm text-gray-600">Je préfère ne pas répondre</label>
               </div>
             </div>
-            <StyledButton fullWidth onClick={() => changeStep(5)} disabled={!gender || !ageRange || (!location.trim() && !preferNotToSayLocation)}>Suivant</StyledButton>
+            <StyledButton fullWidth onClick={() => changeStep(10)} disabled={!gender || !ageRange || (!location.trim() && !preferNotToSayLocation)}>Suivant</StyledButton>
+            <BackButton />
           </div>
         );
       
-      case 5: {
+      case 10: { // Was 5
         const datingQuestions = [
             { question: "Quel est ton état d'esprit actuel face aux rencontres ?", setter: setDatingApproach, options: [
                 { value: DatingApproachOptions.ACTIVE_OPTIMISTIC, label: "En recherche active et optimiste" },
@@ -294,6 +422,14 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
         ];
 
         const currentDatingQuestion = datingQuestions[datingStep];
+        
+        const handleDatingBack = () => {
+            if (datingStep > 0) {
+                setDatingStep(datingStep - 1);
+            } else {
+                changeStep(9); // Go back to personal info step
+            }
+        };
 
         return (
             <div key={`${step}-${datingStep}`} className={`p-6 ${animationClass}`}>
@@ -316,7 +452,7 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
                                     if (datingStep < datingQuestions.length - 1) {
                                         setDatingStep(datingStep + 1);
                                     } else {
-                                        changeStep(6);
+                                        changeStep(11);
                                     }
                                 }, 250);
                             }}
@@ -326,11 +462,14 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
                         </button>
                     ))}
                  </div>
+                 <div className="text-center mt-6">
+                    <button onClick={handleDatingBack} className="text-sm text-gray-500 hover:text-gray-700">Retour</button>
+                 </div>
             </div>
         )
       }
 
-      case 6:
+      case 11: // Was 6
         return (
           <div key={step} className={`p-6 ${animationClass}`}>
              <h2 className="text-xl font-semibold text-center text-gray-800 mb-6">Comment aimes-tu interagir ?</h2>
@@ -338,7 +477,7 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
                 {interactionStyleOptions.map(opt => (
                     <button 
                         key={opt.value} 
-                        onClick={() => { setSocialInteractionStyle(opt.value); changeStep(7); }}
+                        onClick={() => { setSocialInteractionStyle(opt.value); changeStep(12); }}
                         className="w-full text-left p-4 border-2 rounded-lg transition-all duration-200 bg-white border-gray-200 hover:bg-orange-50 hover:border-orange-300"
                     >
                         <p className="font-semibold text-gray-800">{opt.label}</p>
@@ -346,17 +485,21 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ onOnboardingComplete })
                     </button>
                 ))}
             </div>
+            <BackButton />
           </div>
         );
 
-      case 7:
+      case 12: // Was 7
          return (
           <div key={step} className={`text-center p-8 flex flex-col items-center justify-center h-full ${animationClass}`}>
              <p className="text-gray-600 leading-relaxed max-w-sm mb-8">
               {socialInteractionStyle && "Merci. Ton rythme t’appartient et il sera respecté ici. Tu verras aussi comment d’autres avancent différemment. C’est cette diversité qui fait la richesse de HUMĀN."}
             </p>
              <p className="text-lg font-semibold text-gray-800 leading-relaxed max-w-sm mb-8">Ton profil est prêt. Mais il n’est pas figé : il grandira avec toi. Bienvenue chez HUMĀN.</p>
-             <StyledButton size="lg" onClick={handleFinalSubmit} variant="success">Accéder à HUMĀN</StyledButton>
+             <div className="w-full max-w-xs">
+                <StyledButton size="lg" onClick={handleFinalSubmit} variant="success" fullWidth>Accéder à HUMĀN</StyledButton>
+                <BackButton />
+             </div>
           </div>
         );
 

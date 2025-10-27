@@ -1,9 +1,4 @@
 
-
-
-
-
-
 import React, { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -243,7 +238,8 @@ function createWorkshopInstanceFromTemplate(template: WorkshopTheme, existingIds
   while (existingIds.includes(newId)) {
     newId = generateUniqueWorkshopId(baseIdPrefix);
   }
-  const maxParticipants = template.maxParticipants || (Math.floor(Math.random() * 5) + 6); // Total: 6, 7, 8, 9, or 10
+  const possibleSizes = [6, 8, 10];
+  const maxParticipants = template.maxParticipants || possibleSizes[Math.floor(Math.random() * possibleSizes.length)]; // Total: 6, 8, or 10 for gender parity
   return {
     ...template,
     templateId: template.id, // Keep a reference to the original template ID
@@ -288,7 +284,7 @@ const createProfessionSpecificWorkshopTemplate = (userProfession: ProfessionCate
     categoryKey: 'professionnel',
     date: getFutureDateString(Math.floor(Math.random() * 7) + 1),
     time: ['18:00', '19:00', '20:00'][Math.floor(Math.random() * 3)],
-    duration: '25 min',
+    duration: '60 min',
     image: 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=400',
     currentParticipants: maxParticipants - 1,
     maxParticipants: maxParticipants,
@@ -912,7 +908,7 @@ const handleStartOrResumeWorkshop = useCallback(async (workshopId: string, works
             typingParticipantName: moderator.name,
             lastUserMessageTimestamp: Date.now(),
             workshopStartTime: Date.now(),
-            workshopScheduledEndTime: Date.now() + (parseInt(workshopDetails.duration || '20') * 60 * 1000),
+            workshopScheduledEndTime: Date.now() + (parseInt(workshopDetails.duration || '60') * 60 * 1000),
             isWorkshopEndingAnnounced: false,
             isClosureProposedDueToInactivity: false,
         };

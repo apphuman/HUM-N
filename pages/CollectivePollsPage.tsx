@@ -1,3 +1,8 @@
+
+
+
+
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageContainer from '../components/PageContainer';
@@ -32,7 +37,7 @@ const CollectivePollsPage: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
 
-  // FIX: Explicitly cast `count` to Number to prevent `unknown` type errors in reduce.
+  // FIX: Added Number() casting to prevent potential type errors with reduce.
   const totalVotes = Object.values(poll.results).reduce((sum, count) => sum + Number(count), 0);
 
   const handleVote = () => {
@@ -42,6 +47,7 @@ const CollectivePollsPage: React.FC = () => {
     setPoll(prevPoll => {
       const newResults = { ...prevPoll.results };
       // FIX: Use explicit addition and Number casting to avoid `unknown` type error with increment operator.
+      // Fix: Operator '+' cannot be applied to types 'unknown' and 'number'.
       newResults[selectedOption] = Number(newResults[selectedOption]) + 1;
       return { ...prevPoll, results: newResults };
     });
@@ -65,6 +71,7 @@ const CollectivePollsPage: React.FC = () => {
             {poll.options.map(option => {
               const votesForOption = poll.results[option.id];
               // FIX: Explicitly cast `votesForOption` to Number to prevent `unknown` type errors in arithmetic operations.
+              // Fix: Operator '>' cannot be applied to types 'unknown' and 'number'. The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
               const percentage = totalVotes > 0 ? ((Number(votesForOption) / totalVotes) * 100).toFixed(1) : "0.0";
               const isSelected = option.id === selectedOption;
 

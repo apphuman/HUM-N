@@ -11,6 +11,7 @@ import {
     MOCK_AUDIO_CAPSULES_PREMIUM,
     ECHOS_QUESTIONS_BY_LEVEL,
     getLevelFromXP,
+    DAILY_XP_AWARDED_FOR_SUBMISSION_KEY_PREFIX,
 } from '../constants';
 import { HeartIcon, EyeIcon, SparklesIcon, StarIcon, InfoIcon, LockClosedIcon, PlayIcon, PauseIcon, MicrophoneIcon, PaperAirplaneIcon, ArrowLeftIcon } from '../components/icons';
 import { AudioIcon as PageAudioIcon } from '../components/icons/AudioIcon'; 
@@ -59,9 +60,15 @@ const EchosPage: React.FC<EchosPageProps> = ({ userProfile, onUpdateXP }) => {
   const [audioCapsules, setAudioCapsules] = useState<AudioCapsule[]>([]);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
 
+  const [isAwaitingContinuation, setIsAwaitingContinuation] = useState(false);
+
   const todayDateString = new Date().toISOString().split('T')[0];
   const userLevel = userProfile ? getLevelFromXP(userProfile.totalXP) : null;
   const lastInteractionRef = useRef<HTMLDivElement>(null);
+
+  const lastInteraction = todaysSubmission?.interactions[todaysSubmission.interactions.length - 1];
+  const isConversationFinished = lastInteraction?.aiAnalysis?.isConclusion === true;
+  const isWaitingForUserReply = lastInteraction?.aiAnalysis && !isConversationFinished && !isAwaitingContinuation;
 
 
   useEffect(() => {
@@ -89,8 +96,13 @@ const EchosPage: React.FC<EchosPageProps> = ({ userProfile, onUpdateXP }) => {
       const savedToday = allSubmissions.find(s => s.date === todayDateString);
       if (savedToday) {
         setTodaysSubmission(savedToday);
+        const lastAIInteraction = savedToday.interactions[savedToday.interactions.length - 1]?.aiAnalysis;
+        if(lastAIInteraction?.shouldPromptForContinuation) {
+            setIsAwaitingContinuation(true);
+        }
       } else {
         setTodaysSubmission(null);
+        setIsAwaitingContinuation(false);
         if (userLevel) {
             const questions = ECHOS_QUESTIONS_BY_LEVEL[userLevel.name] || ECHOS_QUESTIONS_BY_LEVEL.Seeker;
             setCurrentQuestion(questions[Math.floor(Math.random() * questions.length)]);
@@ -112,15 +124,16 @@ const EchosPage: React.FC<EchosPageProps> = ({ userProfile, onUpdateXP }) => {
       localStorage.setItem(ECHOS_SUBMISSIONS_STORAGE_KEY, JSON.stringify(updatedSubmissions));
   };
   
-const handleSendEcho = async () => {
-    if (!currentInput.trim() || !userProfile) return;
+const handleSendEcho = async (textToSend: string) => {
+    if (!textToSend.trim() || !userProfile) return;
     setIsLoadingAI(true);
-    const textToSend = currentInput.trim();
     setCurrentInput('');
+
+    const dailyXPAwardedKey = `${DAILY_XP_AWARDED_FOR_SUBMISSION_KEY_PREFIX}${todayDateString}`;
+    const hasXpBeenAwardedToday = localStorage.getItem(dailyXPAwardedKey) === 'true';
 
     const isFirstPostOfDay = !todaysSubmission;
 
-    // 1. Create user message interaction
     let userInteraction: DailyInteraction;
     if (todaysSubmission) {
         userInteraction = { id: `reply-${Date.now()}`, timestamp: new Date(), userReply: { text: textToSend } };
@@ -128,25 +141,8 @@ const handleSendEcho = async () => {
         userInteraction = { id: `echo-${Date.now()}`, timestamp: new Date(), userEcho: { questionPrompt: currentQuestion, text: textToSend } };
     }
 
-    // 2. Build initial interactions array for the day
     let interactions: DailyInteraction[] = todaysSubmission ? [...todaysSubmission.interactions, userInteraction] : [userInteraction];
     
-    // 3. Add system message for first post XP
-    if (isFirstPostOfDay) {
-        onUpdateXP(5, 'totalXP');
-        const systemXPMessage: DailyInteraction = {
-            id: `system-xp-${Date.now()}`,
-            timestamp: new Date(),
-            aiAnalysis: {
-                themes: ["Engagement Quotidien"],
-                followUpQuestion: "Merci pour ton premier écho du jour ! Tu gagnes +5 XP pour ton engagement. ✨",
-                xpAward: null
-            }
-        };
-        interactions.push(systemXPMessage);
-    }
-    
-    // 4. Create or update the submission object and save it to show user message + XP message immediately
     let submissionToUpdate: UserDailySubmission = todaysSubmission 
         ? { ...todaysSubmission, interactions }
         : {
@@ -156,21 +152,48 @@ const handleSendEcho = async () => {
             resonancesFound: 0,
             xpMiroirReceived: 0,
           };
-    updateAndSaveSubmissions(submissionToUpdate);
+    // Save immediately to show user message
+    updateAndSaveSubmissions(submissionToUpdate); 
 
-    // 5. Call AI for analysis
-    const result = await analyzeEcho(textToSend, userProfile.firstName, interactions);
+    const userMessageCount = interactions.filter(i => i.userEcho || i.userReply).length;
+
+    const result = await analyzeEcho(textToSend, userProfile.firstName, interactions, userMessageCount, userProfile.isPremium);
     
     if (result.analysis) {
         const aiInteraction: DailyInteraction = { id: `ai-${Date.now()}`, timestamp: new Date(), aiAnalysis: result.analysis };
-        
-        // Add AI response to the submission and save again
         submissionToUpdate.interactions.push(aiInteraction);
-        updateAndSaveSubmissions({ ...submissionToUpdate }); // spread to create a new object and trigger re-render
         
-        // Award XP from AI
-        if (result.analysis.xpAward) {
-            onUpdateXP(result.analysis.xpAward.amount, 'emotional', result.analysis.xpAward.typeKey);
+        if(result.analysis.shouldPromptForContinuation) {
+            setIsAwaitingContinuation(true);
+        }
+
+        let xpAwardedThisTime = false;
+        if (!hasXpBeenAwardedToday) {
+            // Prioritize emotional XP from the analysis
+            if (result.analysis.xpAward) {
+                onUpdateXP(result.analysis.xpAward.amount, 'emotional', result.analysis.xpAward.typeKey);
+                xpAwardedThisTime = true;
+            } 
+            // Fallback to engagement XP on the very first post of the day if no emotional XP was given
+            else if (isFirstPostOfDay) {
+                onUpdateXP(5, 'totalXP');
+                const systemXPMessage: DailyInteraction = {
+                    id: `system-xp-${Date.now()}`,
+                    timestamp: new Date(),
+                    aiAnalysis: {
+                        themes: ["Engagement Quotidien"],
+                        followUpQuestion: "Merci pour ton premier écho du jour ! Tu gagnes +5 XP pour ton engagement. ✨",
+                        xpAward: null,
+                        isConclusion: false,
+                    }
+                };
+                submissionToUpdate.interactions.push(systemXPMessage);
+                xpAwardedThisTime = true;
+            }
+
+            if (xpAwardedThisTime) {
+                localStorage.setItem(dailyXPAwardedKey, 'true');
+            }
         }
     } else {
         console.error("AI analysis failed:", result.error);
@@ -180,14 +203,43 @@ const handleSendEcho = async () => {
              aiAnalysis: {
                 themes: ["Erreur"],
                 followUpQuestion: "Désolé, une erreur est survenue lors de l'analyse. Réessaie plus tard.",
-                xpAward: null
+                xpAward: null,
+                isConclusion: false,
              }
         };
         submissionToUpdate.interactions.push(errorInteraction);
-        updateAndSaveSubmissions({ ...submissionToUpdate });
     }
+
+    // Final save with AI response and potential XP message
+    updateAndSaveSubmissions({ ...submissionToUpdate });
+
     setIsLoadingAI(false);
 };
+
+const handleContinueConversation = () => {
+    setIsAwaitingContinuation(false);
+    handleSendEcho("Je souhaite continuer.");
+}
+
+const handleStopConversation = () => {
+    if (!todaysSubmission) return;
+
+    const conclusionInteraction: DailyInteraction = {
+      id: `conclusion-${Date.now()}`,
+      timestamp: new Date(),
+      aiAnalysis: {
+        themes: ["Conclusion"],
+        followUpQuestion: "D'accord, nous nous arrêtons ici pour aujourd'hui. Belle introspection ! ✨",
+        xpAward: null,
+        isConclusion: true,
+        shouldPromptForContinuation: false,
+      }
+    };
+    
+    const submissionToUpdate = { ...todaysSubmission, interactions: [...todaysSubmission.interactions, conclusionInteraction]};
+    updateAndSaveSubmissions(submissionToUpdate);
+    setIsAwaitingContinuation(false);
+}
 
   
   // Microphone logic
@@ -301,9 +353,6 @@ const handleSendEcho = async () => {
     return <PageContainer title="Miroir & Résonance"><LoadingSpinner /></PageContainer>;
   }
   
-  const lastInteraction = todaysSubmission?.interactions[todaysSubmission.interactions.length - 1];
-  const isWaitingForUserReply = lastInteraction?.aiAnalysis;
-
   const renderAujourdhuiTab = () => (
     <div className="flex flex-col h-[calc(100vh-12rem)] sm:h-[calc(100vh-10rem)] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
         {/* Conversation Area */}
@@ -356,36 +405,47 @@ const handleSendEcho = async () => {
             <div />
         </div>
         {/* Input Area */}
-        <div className="p-4 border-t border-gray-200 bg-white">
-            <div className="relative flex items-center space-x-2">
-                 <textarea
-                    value={currentInput}
-                    onChange={(e) => setCurrentInput(e.target.value)}
-                    placeholder={isWaitingForUserReply ? "Ta réponse..." : "Ton écho..."}
-                    className="form-textarea flex-grow p-3 pr-12 resize-none"
-                    rows={1}
-                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendEcho())}
-                    disabled={isLoadingAI}
-                    style={{ overflowY: 'hidden', height: 'auto', minHeight: '44px' }}
-                    onInput={(e) => {
-                        const target = e.target as HTMLTextAreaElement;
-                        target.style.height = 'auto';
-                        target.style.height = `${target.scrollHeight}px`;
-                    }}
-                />
-                 <button 
-                    onClick={toggleRecording} 
-                    className={`absolute right-14 p-2 rounded-full transition-colors ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 hover:bg-gray-100'}`}
-                    title="Dicter"
-                    disabled={isLoadingAI}
-                >
-                    <MicrophoneIcon className="w-5 h-5"/>
-                </button>
-                <StyledButton onClick={handleSendEcho} disabled={!currentInput.trim() || isLoadingAI} className="px-3">
-                    <PaperAirplaneIcon className="w-5 h-5"/>
-                </StyledButton>
+        {isConversationFinished ? (
+            <div className="p-4 border-t border-gray-200 bg-green-50 text-center">
+                <p className="text-sm font-semibold text-green-800">Réflexion du jour terminée.</p>
+                <p className="text-xs text-green-700 mt-1">Revenez demain pour un nouvel Écho. ✨</p>
             </div>
-        </div>
+        ) : isAwaitingContinuation ? (
+             <div className="p-4 border-t border-gray-200 bg-white flex flex-col sm:flex-row items-center justify-center gap-3">
+                <StyledButton onClick={handleContinueConversation} variant="primary" className="w-full sm:w-auto">Continuer la réflexion</StyledButton>
+                <StyledButton onClick={handleStopConversation} variant="secondary" className="w-full sm:w-auto">Arrêter pour aujourd'hui</StyledButton>
+            </div>
+        ) : (
+            <div className="p-4 border-t border-gray-200 bg-white">
+                <div className="relative flex items-center space-x-2">
+                    <textarea
+                        value={currentInput}
+                        onChange={(e) => setCurrentInput(e.target.value)}
+                        placeholder={isWaitingForUserReply ? "Ta réponse..." : "Ton écho..."}
+                        className="form-textarea flex-grow p-3 pr-12 resize-none"
+                        rows={1}
+                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendEcho(currentInput))}
+                        disabled={isLoadingAI}
+                        style={{ overflowY: 'hidden', height: 'auto', minHeight: '44px' }}
+                        onInput={(e) => {
+                            const target = e.target as HTMLTextAreaElement;
+                            target.style.height = 'auto';
+                            target.style.height = `${target.scrollHeight}px`;
+                        }}
+                    />
+                    <button
+                        onClick={toggleRecording}
+                        className={`absolute right-14 p-2 rounded-full transition-colors ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 hover:bg-gray-100'}`}
+                        title="Dicter"
+                        disabled={isLoadingAI}>
+                        <MicrophoneIcon className="w-5 h-5"/>
+                    </button>
+                    <StyledButton onClick={() => handleSendEcho(currentInput)} disabled={!currentInput.trim() || isLoadingAI} className="px-3">
+                        <PaperAirplaneIcon className="w-5 h-5"/>
+                    </StyledButton>
+                </div>
+            </div>
+        )}
     </div>
   );
 
@@ -452,50 +512,75 @@ const handleSendEcho = async () => {
     </div>
   );
 
-  const renderMesEcritsTab = () => (
-    <div className="space-y-4">
-       <div className="flex items-center mb-3 bg-white p-3 rounded-lg shadow-sm border">
-          <EyeIcon className="w-6 h-6 text-blue-500 mr-2" />
-          <h2 className="text-xl font-bold text-gray-800">Ton Journal d'Échos</h2>
-        </div>
-      {userSubmissions.length > 0 ? userSubmissions.map(submission => (
-        <div key={submission.id} className="bg-white p-4 rounded-xl shadow-lg border border-gray-200/70 space-y-3">
-          <p className="text-xs font-semibold text-gray-500 border-b pb-2">{new Date(submission.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}</p>
-          {submission.interactions.map(interaction => (
-            <div key={interaction.id}>
-                 {interaction.userEcho && (
-                    <>
-                        <p className="text-xs text-gray-500 italic mb-1">{interaction.userEcho.questionPrompt}</p>
-                        <div className="bg-orange-50 p-3 rounded-md border border-orange-100">
-                           <p className="text-sm text-gray-800 whitespace-pre-wrap">{interaction.userEcho.text}</p>
-                        </div>
-                    </>
-                 )}
-                 {interaction.aiAnalysis && (
-                     <div className="bg-gray-50 p-3 rounded-md border border-gray-100 mt-2 space-y-2">
-                        <p className="text-xs text-gray-500 italic">{interaction.aiAnalysis.followUpQuestion}</p>
-                        <div className="flex flex-wrap gap-1">
-                            {interaction.aiAnalysis.themes.map(theme => (
-                                <span key={theme} className="text-[10px] font-medium bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">{theme}</span>
-                            ))}
-                        </div>
-                     </div>
-                 )}
-                 {interaction.userReply && (
-                     <div className="bg-orange-50 p-3 rounded-md border border-orange-100 mt-2">
-                        <p className="text-sm text-gray-800 whitespace-pre-wrap">{interaction.userReply.text}</p>
-                     </div>
-                 )}
+  const renderMesEcritsTab = () => {
+    if (userSubmissions.length === 0) {
+        return (
+            <div className="bg-white p-5 rounded-xl shadow-lg border text-center">
+                <p className="text-gray-600">Tes échos sauvegardés apparaîtront ici.</p>
             </div>
-          ))}
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center mb-3 bg-white p-3 rounded-lg shadow-sm border">
+                <EyeIcon className="w-6 h-6 text-blue-500 mr-2" />
+                <h2 className="text-xl font-bold text-gray-800">Ton Journal d'Échos</h2>
+            </div>
+            {userSubmissions.map(submission => {
+                const initialEcho = submission.interactions.find(i => i.userEcho)?.userEcho;
+                const followUps = submission.interactions.slice(1);
+
+                return (
+                    <div key={submission.id} className="bg-white p-4 rounded-xl shadow-lg border border-gray-200/70 space-y-3">
+                        <p className="text-xs font-semibold text-gray-500 border-b pb-2">
+                            {new Date(submission.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
+                        </p>
+
+                        {initialEcho && (
+                            <div>
+                                <p className="text-xs text-gray-500 italic mb-1">{initialEcho.questionPrompt}</p>
+                                <div className="bg-orange-50 p-3 rounded-md border border-orange-100">
+                                    <p className="text-sm text-gray-800 whitespace-pre-wrap">{initialEcho.text}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {followUps.length > 0 && (
+                            <div className="pt-3 border-t border-dashed">
+                                <h4 className="text-sm font-semibold text-gray-600 mb-2">Suite de la réflexion...</h4>
+                                <div className="space-y-3">
+                                    {followUps.map(interaction => {
+                                        if (interaction.aiAnalysis && interaction.aiAnalysis.xpAward === null && !interaction.aiAnalysis.isConclusion) {
+                                            const nextInteractionIsReply = followUps.find(f => f.userReply && f.timestamp > interaction.timestamp);
+                                            // Only show AI question if it leads to a user reply, to avoid clutter
+                                            if(nextInteractionIsReply) {
+                                                return (
+                                                    <p key={interaction.id} className="text-xs text-gray-500 italic pl-4 border-l-2 border-gray-200">
+                                                        Humānia : "{interaction.aiAnalysis.followUpQuestion}"
+                                                    </p>
+                                                );
+                                            }
+                                        }
+                                        if (interaction.userReply) {
+                                            return (
+                                                <div key={interaction.id} className="bg-orange-50 p-3 rounded-md border border-orange-100 ml-4">
+                                                    <p className="text-sm text-gray-800 whitespace-pre-wrap">{interaction.userReply.text}</p>
+                                                </div>
+                                            );
+                                        }
+                                        // Don't render XP messages or conclusions here to keep it clean
+                                        return null;
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
         </div>
-      )) : (
-        <div className="bg-white p-5 rounded-xl shadow-lg border text-center">
-          <p className="text-gray-600">Tes échos sauvegardés apparaîtront ici.</p>
-        </div>
-      )}
-    </div>
-  );
+    );
+};
 
   const renderAudioCapsulesTab = () => (
     <div className="space-y-4">

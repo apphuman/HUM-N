@@ -374,6 +374,8 @@ export interface AIAnalysisResult {
         typeName: string;
         amount: number;
     } | null;
+    isConclusion?: boolean;
+    shouldPromptForContinuation?: boolean;
 }
 
 export interface DailyInteraction {

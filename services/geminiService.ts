@@ -1,5 +1,6 @@
 
 
+
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 import { GEMINI_API_KEY_ERROR_MESSAGE, GENERIC_QUOTE_ERROR_MESSAGE, EMOTIONAL_XP_TYPES, FLEXIBLE_PREFERENCES_OPTIONS, getGenderedStrings } from '../constants';
 import { DailyInteraction, UserDailySubmission, UserProfile, WorkshopTheme, AIAnalysisResult, ChatMessage, WorkshopSummaryData, MicroChallenge } from "../types";
@@ -92,7 +93,9 @@ export const fetchInspirationalQuote = async (): Promise<{ quote: string | null;
 export const analyzeEcho = async (
   userEcho: string,
   userFirstName: string,
-  conversationHistory: DailyInteraction[]
+  conversationHistory: DailyInteraction[],
+  userMessageCount: number,
+  isPremium: boolean
 ): Promise<{ analysis: AIAnalysisResult | null; error: string | null }> => {
   if (!apiKeyAvailable || !ai) {
     return { analysis: null, error: GEMINI_API_KEY_ERROR_MESSAGE };
@@ -110,20 +113,51 @@ export const analyzeEcho = async (
     .filter(Boolean)
     .join('\n');
 
+  const CONVERSATION_LIMIT = 4;
+
+  // FIX: Escaped backticks in template literal were causing parsing errors. Replaced with single quotes for clarity.
   const prompt = `
-    Tu es un guide bienveillant pour l'application d'introspection HUMĀN. L'utilisateur, ${userFirstName}, vient de partager une réflexion (un "Écho").
+    Tu es un guide bienveillant pour l'application d'introspection HUMĀN. L'utilisateur, ${userFirstName}, partage une réflexion.
+    L'utilisateur est ${isPremium ? 'Premium' : 'non-Premium'}.
+    
     Voici l'historique de la conversation d'aujourd'hui :
     ${historySummary}
     
-    Le NOUVEL Écho de ${userFirstName} est : "${userEcho}"
+    Le NOUVEAU message de ${userFirstName} est : "${userEcho}"
 
-    Ta tâche est d'analyser cet écho et de répondre UNIQUEMENT avec un JSON valide qui suit le schéma ci-dessous.
-    
-    1.  **Thèmes (themes)**: Identifie 2 ou 3 thèmes émotionnels ou conceptuels dominants dans le texte de l'utilisateur. Sois concis.
-    2.  **Question de Suivi (followUpQuestion)**: Pose UNE question ouverte, bienveillante et courte (1-2 phrases max) pour aider ${userFirstName} à approfondir sa réflexion. La question doit être directement liée à son écho.
-    3.  **Récompense XP (xpAward)**: Analyse la nature de l'écho et choisis UN seul type d'XP émotionnel à attribuer. La récompense doit être pertinente. Par exemple, si l'utilisateur partage une peur, "Courage" ou "Vulnérabilité" serait pertinent. Si la réflexion est claire et bien articulée, "Clarté émotionnelle" est un bon choix. La quantité doit toujours être 5. Si aucun XP ne semble vraiment approprié, renvoie 'null'.
+    Ta tâche est de répondre UNIQUEMENT avec un JSON valide.
 
-    Liste des types d'XP possibles : ${emotionalXpListString}.
+    **RÈGLES DE CONVERSATION**
+    L'utilisateur a envoyé au total ${userMessageCount} messages aujourd'hui (ce nouveau message inclus).
+
+    - **CAS 1 : Conversation en cours (${userMessageCount} < ${CONVERSATION_LIMIT})**
+      - Pose une question ouverte, bienveillante et courte pour approfondir.
+      - 'isConclusion' sera 'false'.
+      - 'shouldPromptForContinuation' sera 'false'.
+
+    - **CAS 2 : Limite atteinte (Freemium) (${userMessageCount} >= ${CONVERSATION_LIMIT} ET non-Premium)**
+      - NE POSE PAS de question. Écris une phrase de conclusion douce et encourageante.
+      - 'isConclusion' sera 'true'.
+      - 'shouldPromptForContinuation' sera 'false'.
+
+    - **CAS 3 : Proposition de continuation (Premium) (${userMessageCount} === ${CONVERSATION_LIMIT} ET Premium)**
+      - NE POSE PAS de question d'approfondissement. Pose une question pour savoir s'il veut continuer.
+      - Ton 'followUpQuestion' doit être : "Nous avons bien exploré ce point. Souhaites-tu continuer à creuser ou préfères-tu t'arrêter là pour aujourd'hui ?"
+      - 'isConclusion' sera 'false'.
+      - 'shouldPromptForContinuation' sera 'true'.
+
+    - **CAS 4 : Continuation (Premium) (${userMessageCount} > ${CONVERSATION_LIMIT} ET Premium)**
+      - L'utilisateur a choisi de continuer. Comporte-toi comme dans le CAS 1 : pose une question ouverte pour approfondir.
+      - 'isConclusion' sera 'false'.
+      - 'shouldPromptForContinuation' sera 'false'.
+
+
+    **FORMAT DE RÉPONSE JSON**
+    1.  **themes**: Identifie 2-3 thèmes dominants dans le message.
+    2.  **followUpQuestion**: La question ou la conclusion, en suivant les règles ci-dessus.
+    3.  **isConclusion**: 'true' si la conversation se termine définitivement (CAS 2), sinon 'false'.
+    4.  **shouldPromptForContinuation**: 'true' si tu demandes à l'utilisateur de continuer (CAS 3), sinon 'false'.
+    5.  **xpAward**: Attribue 5 XP d'un type pertinent si c'est le premier message du jour, sinon 'null'. Types possibles : ${emotionalXpListString}.
   `;
 
   try {
@@ -138,11 +172,15 @@ export const analyzeEcho = async (
               themes: {
                 type: Type.ARRAY,
                 items: { type: Type.STRING },
-                description: "Liste de 2-3 thèmes dominants de l'écho de l'utilisateur."
               },
               followUpQuestion: {
                 type: Type.STRING,
-                description: "Une question ouverte et bienveillante pour approfondir la réflexion."
+              },
+              isConclusion: {
+                type: Type.BOOLEAN,
+              },
+              shouldPromptForContinuation: {
+                type: Type.BOOLEAN,
               },
               xpAward: {
                 type: Type.OBJECT,
@@ -150,21 +188,19 @@ export const analyzeEcho = async (
                 properties: {
                   typeKey: { 
                     type: Type.STRING, 
-                    description: `La clé (ex: "authenticite") du type d'XP choisi parmi la liste fournie.`,
                     enum: EMOTIONAL_XP_TYPES.map(xp => xp.key)
                   },
                   typeName: { 
                     type: Type.STRING,
-                    description: `Le nom complet (ex: "Authenticité") du type d'XP choisi.`,
                     enum: EMOTIONAL_XP_TYPES.map(xp => xp.name)
                   },
                   amount: { 
                     type: Type.INTEGER,
-                    description: "La quantité d'XP à attribuer, toujours 5."
                   },
                 },
               },
             },
+            required: ['themes', 'followUpQuestion', 'isConclusion', 'shouldPromptForContinuation', 'xpAward']
           },
         }
     });
